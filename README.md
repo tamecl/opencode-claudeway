@@ -14,6 +14,45 @@ No está listo para distribución: sigue existiendo una limitación de
 redirecciones del host que no permite garantizar su bloqueo en producción; consulta
 [`docs/compatibility.md`](docs/compatibility.md).
 
+## Instalación desde GitHub
+
+Requiere OpenCode **V2** (verificado con `2.0.29`), una sesión existente en Claude
+Code y acceso al repositorio por SSH. No necesitas publicar ni instalar nada desde
+npm; `private: true` solo evita su publicación accidental.
+
+```sh
+opencode plugin add 'git+ssh://git@github.com/tamecl/opencode-claudeway.git#main'
+opencode plugin list
+```
+
+El primer comando instala el paquete y lo añade a la configuración **global** de
+OpenCode. La instalación de dependencias la gestiona OpenCode; no necesitas
+clonar el repositorio, instalar pnpm ni compilar para este método.
+
+Después, dentro de OpenCode:
+
+1. Ejecuta `/connect` y selecciona **Anthropic**.
+2. Elige **Claude Code credentials (Claudeway)** y deja activa esa cuenta.
+3. Ejecuta `/models` y selecciona el modelo Claude que quieras utilizar.
+
+Si el plugin no aparece activo tras instalarlo, reinicia el servicio:
+
+```sh
+opencode service restart
+```
+
+No copies tokens ni elijas el método API key. Conectar Claudeway puede renovar y
+actualizar la fuente de Claude Code si está próxima a caducar. Para fijar una
+revisión, sustituye `#main` por el hash completo del commit deseado. Para actualizar
+solo esta instalación:
+
+```sh
+opencode plugin update 'git+ssh://git@github.com/tamecl/opencode-claudeway.git#main'
+```
+
+Usa este método **o** el directorio local descrito más abajo, no ambos. Instalar
+desde Git no cambia el carácter experimental ni las limitaciones de seguridad.
+
 ## Desarrollo local
 
 OpenCode objetivo: `2.0.29`. Node para desarrollo: `24.12+`. pnpm: `10.32.1`.
@@ -98,7 +137,7 @@ no demuestran cuál de las adaptaciones resolvió por sí sola el error anterior
 El probe bloquea peticiones sin Bearer o con una API key inesperada, espera a que
 OAuth termine y distingue las etapas de inicialización, credenciales y petición.
 
-## Configuración local para la prueba de compatibilidad
+## Alternativa: cargar el directorio local
 
 Después de instalar las dependencias, carga el directorio del paquete en la
 configuración V2 del proyecto donde quieras probarlo:
@@ -115,8 +154,10 @@ La selección es explícita: cargar el plugin no lee credenciales, no conecta un
 cuenta y no reemplaza automáticamente una API key existente. La importación usa
 las APIs públicas de autenticación de V2; OpenCode administra el grant guardado.
 
-No hay instalación publicada: el paquete es privado y el nombre no está reservado.
-No se ha modificado tu configuración global ni instalado el plugin en tu cuenta.
+El paquete no está publicado en npm y su nombre no está reservado. Se puede
+instalar desde GitHub como se indica arriba. Los cambios de este repositorio no
+modifican tu configuración global: la instalación ocurre cuando ejecutas
+`opencode plugin add` o añades explícitamente la ruta a tu configuración.
 
 ## Fuente y límites actuales
 
