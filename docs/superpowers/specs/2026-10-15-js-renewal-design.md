@@ -88,6 +88,16 @@ Los terminales piden
 iniciar sesión y no se repiten para el mismo refresh token mientras viva el proceso.
 El modo de lectura sin renovación conserva el rechazo al límite de sesenta segundos.
 
+## Token propio opcional
+
+Cambio posterior a la aprobación original. Si existe un token de `claude setup-token`
+en el ítem Keychain `Claudeway-token` (macOS) o en `<configDir>/.claudeway-token`
+con permisos privados (Linux), `readCredentials` lo devuelve tal cual, marcado
+`fixed`, antes de tocar las credenciales de Claude Code: sin bloqueo, red, registro
+de recuperación ni renovación. Así no comparte el refresh token rotatorio con Claude
+Code. Un 401 con ese token lanza `static-rejected`. Sin el ítem, el flujo anterior no cambia.
+No hay fallback automático a la CLI.
+
 ## Keychain y límites explícitos
 
 Usar `/usr/bin/security` sin shell, con timeout y salida capturada. Para escribir,

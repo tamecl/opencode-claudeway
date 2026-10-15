@@ -2,6 +2,7 @@ import { Integration, Plugin } from "@opencode/plugin"
 import { randomUUID } from "node:crypto"
 import { requestHeaders, compatibleResponse } from "./compatibility.js"
 import { credentialReader } from "./credentials.js"
+import { failure } from "./errors.js"
 import { transformBody } from "./transforms.js"
 
 export { credentialReader }
@@ -58,12 +59,13 @@ export default Plugin.define({
       const headers = requestHeaders(event.request, adapted, credentials.accessToken, sessionID, excluded)
       if (url.pathname === "/v1/messages" && !url.searchParams.has("beta")) url.searchParams.set("beta", "true")
       event.request = new Request(url, { method: event.request.method, headers, body: JSON.stringify(adapted.body), redirect: "error", signal: event.request.signal })
-      owned.set(event.request, { names: adapted.toolNames, excluded })
+      owned.set(event.request, { names: adapted.toolNames, excluded, fixed: credentials.fixed })
     }, { providerID: "anthropic" })
 
     await ctx.session.hook("http.response", async event => {
       const state = owned.get(event.request)
       if (!state) return
+      if (state.fixed && event.response.status === 401) throw failure("static-rejected")
       event.response = await compatibleResponse(event.request, event.response, state.names, state.excluded)
     }, { providerID: "anthropic" })
 

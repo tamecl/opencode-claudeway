@@ -113,6 +113,8 @@ async function refreshLocked(store, initial) {
 }
 
 export async function readCredentials(store, { renew = true } = {}) {
+  const fixed = await store.readStatic()
+  if (fixed) return fixed
   const initial = await store.read()
   if (!renew) {
     if (initial.credentials.expiresAt <= Date.now() + 60_000) throw failure("expired")

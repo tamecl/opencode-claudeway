@@ -135,6 +135,17 @@ Claude Code no está obligado a respetar nuestro bloqueo. Las relecturas reducen
 carreras, pero no garantizan exclusión absoluta frente a otros clientes ni
 recuperación tras un cierre antes de persistir la respuesta OAuth.
 
+### Token propio (evita choques con Claude Code)
+
+Claudeway y Claude Code comparten un refresh token rotatorio, así que pueden
+chocar al renovar (síntoma: *OAuth renewal is rate-limited*). Para evitarlo,
+guarda un token anual independiente (`claude setup-token`) en el ítem de Keychain
+`Claudeway-token` (macOS) o en `~/.claude/.claudeway-token` con permisos `0600`
+(Linux). Si existe, Claudeway lo usa tal cual: **no lee ni renueva** las
+credenciales de Claude Code. Un 401 pide repetir `setup-token`. Pasos en
+[installation.md](installation.md#optional-dedicated-token-no-renewal-conflicts-with-claude-code).
+No compatible con Windows.
+
 ## Seguridad y límites
 
 ### Qué está comprobado

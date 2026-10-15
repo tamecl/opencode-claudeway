@@ -139,6 +139,7 @@ export class CredentialStore {
     this.platform = platform
     this.security = run
     this.service = "Claude Code-credentials" + (env.CLAUDE_CONFIG_DIR !== undefined ? "-" + hash(this.configDir).slice(0, 8) : "")
+    this.tokenPath = join(this.configDir, ".claudeway-token")
     this.statePath = join(this.configDir, ".claudeway-refresh.json")
     this.lockPath = join(this.configDir, ".claudeway-refresh.lock")
   }
@@ -169,6 +170,23 @@ export class CredentialStore {
       }
     }
     return { source, credentials: parseCredentials(raw), raw }
+  }
+
+  // A `claude setup-token` token owned by Claudeway: never renewed, never shares Claude Code's rotating refresh token.
+  async readStatic() {
+    let raw
+    if (this.platform === "darwin") {
+      try { raw = await this.security(["find-generic-password", "-s", "Claudeway-token", "-w"]) } catch (error) {
+        if (error?.code !== 44) throw failure("keychain")
+      }
+    } else if (this.platform !== "win32") {
+      try { raw = (await readBounded(this.tokenPath, true)).trim() } catch (error) {
+        if (error?.code !== "ENOENT") throw failure(error?.code === "invalid" ? "invalid" : ["permission", "EACCES", "EPERM"].includes(error?.code) ? "permission" : "io")
+      }
+    }
+    if (raw === undefined) return null
+    if (!/^[\x21-\x7e]+$/u.test(raw)) throw failure("invalid")
+    return { accessToken: raw, refreshToken: raw, expiresAt: Date.now() + 3_600_000, fixed: true }
   }
 
   async readState() {

@@ -83,6 +83,20 @@ test("renews on demand with one fixed-destination request and persists rotation 
   assert.deepEqual((await fs.readdir(directory)).sort(), [".claudeway-refresh.json", ".credentials.json"])
 })
 
+test("a Claudeway token is used as-is without renewal, locks, journal or Claude Code credentials", async t => {
+  const { directory, path, store } = await fixture(t, -1)
+  await fs.writeFile(store.tokenPath, "fixture-static\n", { mode: 0o600 })
+  const send = t.mock.method(globalThis, "fetch", () => assert.fail("must not send"))
+  for (const options of [undefined, { renew: false }]) {
+    const value = await readCredentials(store, options)
+    assert.equal(value.accessToken, "fixture-static")
+    assert.equal(value.fixed, true)
+  }
+  assert.equal(send.mock.callCount(), 0)
+  assert.deepEqual((await fs.readdir(directory)).sort(), [".claudeway-token", ".credentials.json"])
+  assert.equal(JSON.parse(await fs.readFile(path, "utf8")).claudeAiOauth.accessToken, "fixture-old-access")
+})
+
 test("concurrent callers share exactly one renewal", async t => {
   const { store } = await fixture(t)
   const renewed = next()
@@ -322,6 +336,7 @@ test("Keychain renewal preserves metadata and updates only the selected service/
   let root = { claudeAiOauth: { ...current, scopes: ["keep"] }, unrelated: 'quotes"\\😀' }
   const writes = []
   const run = async (args, input) => {
+    if (args.includes("Claudeway-token")) throw Object.assign(new Error("missing"), { code: 44 })
     if (args[0] === "-i") {
       assert.deepEqual(args, ["-i"])
       const command = input.match(/"(?:\\.|[^"\\])*"/gu).map(value => JSON.parse(value))
@@ -347,6 +362,7 @@ test("oversized existing Keychain blobs are rejected before renewal", async t =>
   const { directory, current } = await fixture(t)
   const raw = JSON.stringify({ claudeAiOauth: current, extra: "é".repeat(4096) })
   const store = new CredentialStore({ env: { CLAUDE_CONFIG_DIR: directory }, platform: "darwin", security: async args => {
+    if (args.includes("Claudeway-token")) throw Object.assign(new Error("missing"), { code: 44 })
     assert.notEqual(args[0], "-i")
     return args.includes("-w") ? raw : '"acct"<blob>="fixture-account"'
   } })
@@ -360,6 +376,7 @@ test("unexpectedly large rotated tokens remain recoverable instead of truncating
   const { directory, current } = await fixture(t)
   const raw = JSON.stringify(current)
   const store = new CredentialStore({ env: { CLAUDE_CONFIG_DIR: directory }, platform: "darwin", security: async args => {
+    if (args.includes("Claudeway-token")) throw Object.assign(new Error("missing"), { code: 44 })
     assert.notEqual(args[0], "-i", "oversized commands must never reach security")
     return args.includes("-w") ? raw : '"acct"<blob>="fixture-account"'
   } })

@@ -84,6 +84,24 @@ Do not run `opencode auth login`, a generation, or the repository's live verifie
 on the user's behalf without separate authorization. Do not choose an API-key
 method, copy tokens manually, edit OpenCode's database or synchronize `auth.json`.
 
+## Optional: dedicated token (no renewal conflicts with Claude Code)
+
+By default Claudeway shares Claude Code's rotating refresh token, so both can
+collide when renewing (symptom: "OAuth renewal is rate-limited"). To avoid it,
+the **user** (never the agent) stores a separate year-long token:
+
+```sh
+claude setup-token
+# macOS: prompts for the token, so it never lands in shell history or argv
+security add-generic-password -U -s "Claudeway-token" -a "$USER" -w
+# Linux: private file, must be 0600 and owned by the user
+install -m 600 /dev/null ~/.claude/.claudeway-token && cat > ~/.claude/.claudeway-token
+```
+
+When present, Claudeway uses it as-is and never reads or renews Claude Code's
+credentials. After about a year (or a 401), repeat the steps above. Windows is
+not supported.
+
 ## 5. Report the result accurately
 
 Report what was installed, whether it loaded, and whether account activation is

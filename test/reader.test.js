@@ -73,6 +73,25 @@ test("falls back from Keychain only for a missing item, never invalid data or de
   }
 })
 
+test("reads the Claudeway token only from its own private file or Keychain item", async t => {
+  const { directory, store } = await fixture(t)
+  assert.equal(await store.readStatic(), null)
+  await fs.writeFile(store.tokenPath, "fixture-static\n", { mode: 0o644 })
+  await assert.rejects(store.readStatic(), safeError("permission"))
+  await fs.chmod(store.tokenPath, 0o600)
+  const value = await store.readStatic()
+  assert.deepEqual({ ...value, expiresAt: 0 }, { accessToken: "fixture-static", refreshToken: "fixture-static", expiresAt: 0, fixed: true })
+  assert.ok(value.expiresAt > Date.now())
+  await fs.writeFile(store.tokenPath, "has space", { mode: 0o600 })
+  await assert.rejects(store.readStatic(), safeError("invalid"))
+  const calls = []
+  const keychain = code => new CredentialStore({ env: { CLAUDE_CONFIG_DIR: directory }, platform: "darwin", security: async args => { calls.push(args); if (code) throw Object.assign(new Error("fixture-secret"), { code }); return "fixture-static" } })
+  assert.equal((await keychain().readStatic()).accessToken, "fixture-static")
+  assert.deepEqual(calls, [["find-generic-password", "-s", "Claudeway-token", "-w"]])
+  assert.equal(await keychain(44).readStatic(), null)
+  await assert.rejects(keychain(36).readStatic(), safeError("keychain"))
+})
+
 test("Keychain commands use an absolute executable, captured pipes, timeout and no shell or secrets in argv", async t => {
   let input = ""
   const execute = t.mock.method(childProcess, "execFile", (command, args, options, callback) => {
@@ -147,6 +166,7 @@ test("file locks serialize operations, reclaim dead owners and never steal live 
 test("the public JS reader needs no interpreter and supports explicitly read-only diagnostics", async t => {
   const { directory } = await fixture(t)
   t.mock.method(childProcess, "execFile", () => assert.fail("no subprocess for file credentials"))
+  t.mock.method(CredentialStore.prototype, "readStatic", async () => null)
   const read = t.mock.method(CredentialStore.prototype, "read", async function () {
     assert.equal(this.configDir, directory)
     return { source: { kind: "file", path: join(directory, ".credentials.json") }, credentials, raw: JSON.stringify(credentials) }

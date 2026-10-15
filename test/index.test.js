@@ -109,6 +109,15 @@ test("compatibility errors stop host retries only for the selected Claudeway acc
   }
 })
 
+test("a 401 with a Claudeway token asks for a new token instead of a generic error", async t => {
+  t.mock.method(credentialReader, "read", async () => ({ accessToken: "fixture-access", refreshToken: "fixture-access", expiresAt: Date.now() + 120_000, fixed: true }))
+  const fixture = context()
+  await plugin.setup(fixture.ctx)
+  const event = { model: { providerID: "anthropic", id: "fixture" }, request: new Request("https://api.anthropic.com/v1/messages", { method: "POST", body }) }
+  await fixture.hooks.get("http.request").callback(event)
+  await assert.rejects(fixture.hooks.get("http.response").callback({ request: event.request, response: new Response("{}", { status: 401 }) }), /setup-token/)
+})
+
 test("propagates a credential-reader failure instead of faking successful authentication", async t => {
   t.mock.method(credentialReader, "read", async () => { throw Object.assign(new Error("Claude Code credentials are expired"), { code: "expired" }) })
   const fixture = context()
