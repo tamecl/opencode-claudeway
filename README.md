@@ -16,12 +16,27 @@ redirecciones del host que no permite garantizar su bloqueo en producción; cons
 
 ## Instalación desde GitHub
 
+### Para instalarlo con un agente
+
+Copia y pega este texto en OpenCode:
+
+```text
+Install the opencode-claudeway plugin and configure it by following: https://raw.githubusercontent.com/tamecl/opencode-claudeway/main/installation.md
+```
+
+La [guía para agentes](installation.md) instala y comprueba el plugin sin leer
+credenciales ni hacer consultas a Anthropic; la activación de la cuenta queda en
+manos del usuario.
+
+### Instalación manual
+
 Requiere OpenCode **V2** (verificado con `2.0.29`), una sesión existente en Claude
-Code y acceso al repositorio por SSH. No necesitas publicar ni instalar nada desde
-npm; `private: true` solo evita su publicación accidental.
+Code y acceso a GitHub. El repositorio es público y HTTPS no requiere configurar
+SSH. No necesitas publicar ni instalar nada desde npm; `private: true` solo evita
+su publicación accidental.
 
 ```sh
-opencode plugin add 'git+ssh://git@github.com/tamecl/opencode-claudeway.git#main'
+opencode plugin add 'git+https://github.com/tamecl/opencode-claudeway.git#main'
 opencode plugin list
 ```
 
@@ -47,11 +62,13 @@ revisión, sustituye `#main` por el hash completo del commit deseado. Para actua
 solo esta instalación:
 
 ```sh
-opencode plugin update 'git+ssh://git@github.com/tamecl/opencode-claudeway.git#main'
+opencode plugin update 'git+https://github.com/tamecl/opencode-claudeway.git#main'
 ```
 
 Usa este método **o** el directorio local descrito más abajo, no ambos. Instalar
 desde Git no cambia el carácter experimental ni las limitaciones de seguridad.
+Si ya lo instalaste por SSH, conserva ese origen al actualizar; no añadas una
+segunda copia por HTTPS.
 
 ## Desarrollo local
 
