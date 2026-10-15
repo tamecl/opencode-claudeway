@@ -46,6 +46,22 @@ test("attaches credentials only to the official destination and requests redirec
   }
 })
 
+test("the HTTP hook preserves native system updates through consecutive Claude 5.5 turns", async t => {
+  t.mock.method(credentialReader, "read", async () => ({ accessToken: "fixture-access", refreshToken: "fixture-refresh", expiresAt: Date.now() + 120_000 }))
+  const fixture = context()
+  await plugin.setup(fixture.ctx)
+  for (const model of ["claude-sonnet-5-5", "claude-haiku-5-5"]) {
+    const messages = [{ role: "user", content: "hey" }]
+    for (let turn = 0; turn < 3; turn++) {
+      const event = { kind: "primary", model: { providerID: "anthropic", id: model }, request: new Request("https://api.anthropic.com/v1/messages", { method: "POST", body: JSON.stringify({ model, messages }) }) }
+      await fixture.hooks.get("http.request").callback(event)
+      assert.equal(event.request.headers.get("authorization"), "Bearer fixture-access")
+      assert.deepEqual((await event.request.json()).messages, messages)
+      messages.push({ role: "assistant", content: "fixture reply" }, { role: "user", content: "continue" }, { role: "system", content: [{ type: "text", text: "fixture update" }] }, { role: "system", content: [], output_config: { effort: "high" } })
+    }
+  }
+})
+
 test("rejects custom origins before reading or attaching credentials", async t => {
   const read = t.mock.method(credentialReader, "read", async () => { throw new Error("must not read") })
   const fixture = context()

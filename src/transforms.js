@@ -29,10 +29,12 @@ function toolIDs(message, type) {
 }
 
 function repairTools(messages) {
-  const cleaned = messages.flatMap((message, index) => {
-    if (!Array.isArray(message.content)) return [message]
-    const previous = messages[index - 1]
+  let previous
+  const cleaned = messages.flatMap(message => {
+    if (message.role === "system") return [message]
     const uses = new Set(previous?.role === "assistant" ? toolIDs(previous, "tool_use") : [])
+    previous = message
+    if (!Array.isArray(message.content)) return [message]
     toolIDs(message, "tool_result")
     const content = message.content.filter(block => block.type !== "tool_result" || uses.has(block.tool_use_id))
     return content.length ? [{ ...message, content }] : []
@@ -42,11 +44,15 @@ function repairTools(messages) {
     const message = cleaned[index]
     output.push(message)
     const uses = message.role === "assistant" ? toolIDs(message, "tool_use") : []
-    const next = cleaned[index + 1]
+    if (!uses.length) continue
+    let nextIndex = index + 1
+    while (cleaned[nextIndex]?.role === "system") nextIndex++
+    const next = cleaned[nextIndex]
     const present = new Set(next?.role === "user" ? toolIDs(next, "tool_result") : [])
     const missing = uses.filter(id => !present.has(id))
     if (!missing.length) continue
     const placeholders = missing.map(id => ({ type: "tool_result", tool_use_id: id, is_error: true, content: "Tool result unavailable (removed during context compaction)." }))
+    while (index + 1 < nextIndex) output.push(cleaned[++index])
     if (next?.role === "user") {
       const content = typeof next.content === "string" ? next.content ? [{ type: "text", text: next.content }] : [] : next.content
       output.push({ ...next, content: [...placeholders, ...content] })
@@ -60,7 +66,13 @@ export function adaptRequest(payload) {
   if (!record(payload) || typeof payload.model !== "string" || !payload.model) throw failure("invalid-request")
   const body = structuredClone(payload)
   const { messages } = body
-  if (!Array.isArray(messages) || !messages.length || messages.some(message => !record(message) || !["user", "assistant"].includes(message.role) || !(typeof message.content === "string" || Array.isArray(message.content) && message.content.every(record)))) throw failure("invalid-request")
+  if (!Array.isArray(messages) || !messages.length) throw failure("invalid-request")
+  for (const message of messages) {
+    if (!record(message) || !["user", "assistant", "system"].includes(message.role) || !(typeof message.content === "string" || Array.isArray(message.content) && message.content.every(record))) throw failure("invalid-request")
+    if (message.role !== "system") continue
+    if (!Array.isArray(message.content) || message.content.some(block => block.type !== "text" || typeof block.text !== "string")) throw failure("invalid-request")
+    if (message.output_config !== undefined && (!record(message.output_config) || typeof message.output_config.effort !== "string")) throw failure("invalid-request")
+  }
   const first = messages.find(message => message.role === "user")
   if (!first) throw failure("invalid-request")
   const billing = billingHeader(messages)

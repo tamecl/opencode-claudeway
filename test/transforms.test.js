@@ -18,6 +18,37 @@ test("preserves structured user content and string system instructions", () => {
   assert.deepEqual(adapted.body.messages[0].content, [{ type: "text", text: "instructions" }, { type: "text", text: "hey" }, { type: "image", source: { type: "base64", data: "fixture" } }])
 })
 
+test("preserves native system and empty effort updates across Claude 5.5 turns", () => {
+  const messages = [
+    { role: "user", content: "hey" },
+    { role: "assistant", content: [{ type: "thinking", thinking: "fixture", signature: "fixture-signature" }, { type: "text", text: "hello" }] },
+    { role: "user", content: "continue" },
+    { role: "system", content: [{ type: "text", text: "updated instructions", cache_control: { type: "ephemeral" } }] },
+    { role: "system", content: [], output_config: { effort: "high" } },
+    { role: "assistant", content: "second response" },
+    { role: "user", content: "continue again" },
+    { role: "system", content: [], output_config: { effort: "low" } },
+  ]
+  for (const model of ["claude-sonnet-5-5", "claude-haiku-5-5"]) {
+    const payload = request({ model, messages, system: "initial instructions" })
+    const original = structuredClone(payload)
+    const adapted = adaptRequest(payload)
+    assert.deepEqual(payload, original)
+    assert.equal(adapted.body.messages[0].content, "initial instructions\n\nhey")
+    assert.deepEqual(adapted.body.messages.slice(1), messages.slice(1))
+  }
+})
+
+test("rejects malformed native system updates", () => {
+  for (const update of [
+    { content: "not structured" },
+    { content: [{ type: "text", text: 42 }] },
+    { content: [{ type: "tool_use", id: "id-1", name: "read", input: {} }] },
+    { content: [], output_config: null },
+    { content: [], output_config: { effort: 42 } },
+  ]) assert.throws(() => adaptRequest(request({ messages: [{ role: "user", content: "hey" }, { role: "system", ...update }] })), { code: "invalid-request" })
+})
+
 test("billing preserves the previous UTF-16 and UTF-8 compatibility vectors", () => {
   for (const [text, cch, suffix] of [["hey", "fa690", "d7b"], ["hello", "2cf24", "790"], ["😀😀a😀0123456789😀XYZ", "f2fc1", "17d"], ["a\ud800b", "05087", "d7b"]]) {
     const value = billingHeader([{ role: "user", content: text }])
@@ -79,6 +110,24 @@ test("repair handles each repeated occurrence independently and removes orphan r
   assert.equal(repaired[2].content[0].content, "first")
   assert.equal(repaired[4].content[0].tool_use_id, "same-id")
   assert.ok(!JSON.stringify(repaired).includes("orphan"))
+})
+
+test("tool repair preserves system updates and matches results across them", () => {
+  const updates = [{ role: "system", content: [], output_config: { effort: "high" } }, { role: "system", content: [], output_config: { effort: "low" } }]
+  const result = { type: "tool_result", tool_use_id: "id-1", content: "actual result" }
+  for (const next of [{ role: "user", content: [result] }, { role: "user", content: "continue" }, { role: "assistant", content: "continue" }, undefined]) {
+    const messages = [{ role: "user", content: "hey" }, { role: "assistant", content: [{ type: "tool_use", id: "id-1", name: "read", input: {} }] }, ...updates, ...(next ? [next] : [])]
+    const original = structuredClone(messages)
+    const repaired = adaptRequest(request({ messages })).body.messages
+    assert.deepEqual(messages, original)
+    assert.deepEqual(repaired.slice(2, 4), updates)
+    assert.equal(repaired[4].role, "user")
+    assert.equal(repaired[4].content[0].tool_use_id, "id-1")
+    if (next?.role === "assistant") assert.deepEqual(repaired[5], next)
+    if (next?.role === "user" && typeof next.content === "string") assert.deepEqual(repaired[4].content[1], { type: "text", text: next.content })
+    if (Array.isArray(next?.content)) assert.deepEqual(repaired[4].content, [result])
+    else assert.equal(repaired[4].content[0].is_error, true)
+  }
 })
 
 test("invalid inputs are rejected instead of silently discarding instructions", () => {
