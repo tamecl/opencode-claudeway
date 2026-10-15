@@ -2,10 +2,11 @@
 
 # Claudeway
 
-**Tus credenciales de Claude Code, en OpenCode V2.**
+**Tu sesión de Claude Code, dentro de OpenCode.**
 
 Integración no oficial con renovación OAuth bajo demanda. Sin API key.
 
+[![CI](https://img.shields.io/github/actions/workflow/status/tamecl/opencode-claudeway/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/tamecl/opencode-claudeway/actions/workflows/ci.yml)
 [![OpenCode 2.0.29](https://img.shields.io/badge/OpenCode-2.0.29-24292f?style=flat-square)](https://opencode.ai/v2/docs/plugins)
 [![JavaScript ESM](https://img.shields.io/badge/JavaScript-ESM-f7df1e?style=flat-square)](package.json)
 [![Estado experimental](https://img.shields.io/badge/estado-experimental-d29922?style=flat-square)](docs/compatibility.md)
