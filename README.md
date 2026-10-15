@@ -1,162 +1,100 @@
-# Claudeway — opencode-claudeway
+<div align="center">
 
-Plugin no oficial y propio para utilizar credenciales existentes de Claude Code
-en OpenCode V2. Basado en una migración selectiva de
-[opencode-claude-auth](https://github.com/griffinmartin/opencode-claude-auth), no en
-una modificación de ese repositorio.
+# Claudeway
 
-**Estado: JavaScript único, con renovación OAuth automática bajo demanda; experimental.**
-La versión anterior validó una generación real: **HTTP 200 y `OK`** con
-`claude-haiku-4-5`, Bearer OAuth y sin API key, después de corregir el `400 extra-usage`.
-La migración JS y la renovación se han validado solo con fixtures: **no se han
-renovado ni escrito credenciales reales en esta etapa**.
-No está listo para distribución: sigue existiendo una limitación de
-redirecciones del host que no permite garantizar su bloqueo en producción; consulta
-[`docs/compatibility.md`](docs/compatibility.md).
+**Tus credenciales de Claude Code, en OpenCode V2.**
 
-## Instalación desde GitHub
+Integración no oficial con renovación OAuth bajo demanda. Sin API key.
 
-### Para instalarlo con un agente
+[![OpenCode 2.0.29](https://img.shields.io/badge/OpenCode-2.0.29-24292f?style=flat-square)](https://opencode.ai/v2/docs/plugins)
+[![JavaScript ESM](https://img.shields.io/badge/JavaScript-ESM-f7df1e?style=flat-square)](package.json)
+[![Estado experimental](https://img.shields.io/badge/estado-experimental-d29922?style=flat-square)](docs/compatibility.md)
+[![Licencia MIT](https://img.shields.io/badge/licencia-MIT-3fb950?style=flat-square)](LICENSE)
 
-Copia y pega este texto en OpenCode:
+[Instalación](#instalación) · [Renovación](#renovación-automática) · [Seguridad](#seguridad-y-límites) · [Desarrollo](#desarrollo) · [Guía para agentes](installation.md)
+
+</div>
+
+> [!WARNING]
+> **Experimental y no oficial.** La versión JS y la renovación solo se han validado
+> con credenciales ficticias. OpenCode `2.0.29` todavía impide garantizar el bloqueo
+> de redirecciones del primer envío nativo. No está listo para distribución general.
+
+## Qué ofrece
+
+| Función | Cómo funciona |
+| :--- | :--- |
+| **Tu suscripción existente** | Utiliza OAuth de Claude Code, no una conexión con API key. |
+| **Renovación bajo demanda** | Renueva al usar el modelo, sin temporizadores ni generaciones auxiliares del CLI. |
+| **Integración nativa** | Se activa explícitamente en OpenCode V2 y conserva las demás conexiones. |
+| **JavaScript de principio a fin** | Sin Python, compilación ni dependencias nativas nuevas. |
+
+## Instalación
+
+Necesitas **OpenCode V2** —verificado con `2.0.29`— y una sesión existente en
+Claude Code. El repositorio es público; no hace falta configurar SSH ni publicar
+el paquete en npm.
+
+### Con un agente
+
+Copia y pega esta línea en OpenCode:
 
 ```text
 Install the opencode-claudeway plugin and configure it by following: https://raw.githubusercontent.com/tamecl/opencode-claudeway/main/installation.md
 ```
 
 La [guía para agentes](installation.md) instala y comprueba el plugin sin leer
-credenciales ni hacer consultas a Anthropic; la activación de la cuenta queda en
+credenciales ni hacer consultas a Anthropic. La activación de la cuenta queda en
 manos del usuario.
 
-### Instalación manual
-
-Requiere OpenCode **V2** (verificado con `2.0.29`), una sesión existente en Claude
-Code y acceso a GitHub. El repositorio es público y HTTPS no requiere configurar
-SSH. No necesitas publicar ni instalar nada desde npm; `private: true` solo evita
-su publicación accidental.
+### Manualmente
 
 ```sh
 opencode plugin add 'git+https://github.com/tamecl/opencode-claudeway.git#main'
 opencode plugin list
 ```
 
-El primer comando instala el paquete y lo añade a la configuración **global** de
-OpenCode. La instalación de dependencias la gestiona OpenCode; no necesitas
-clonar el repositorio, instalar pnpm ni compilar para este método.
+OpenCode instala las dependencias y añade el plugin a su configuración **global**.
+No necesitas clonar el repositorio, instalar pnpm ni compilar.
 
 Después, dentro de OpenCode:
 
-1. Ejecuta `/connect` y selecciona **Anthropic**.
-2. Elige **Claude Code credentials (Claudeway)** y deja activa esa cuenta.
-3. Ejecuta `/models` y selecciona el modelo Claude que quieras utilizar.
+1. **`/connect`** → Anthropic → **Claude Code credentials (Claudeway)**.
+2. Deja activa la cuenta Claudeway.
+3. **`/models`** → selecciona tu modelo Claude.
 
-Si el plugin no aparece activo tras instalarlo, reinicia el servicio:
+> [!IMPORTANT]
+> Conectar o usar Claudeway puede renovar tokens y actualizar la fuente de
+> credenciales de Claude Code. No copies tokens manualmente ni elijas el método
+> API key. Cargar el plugin, por sí solo, no conecta ninguna cuenta.
 
-```sh
-opencode service restart
-```
+<details>
+<summary><strong>Actualizar, fijar una revisión o reiniciar el servicio</strong></summary>
 
-No copies tokens ni elijas el método API key. Conectar Claudeway puede renovar y
-actualizar la fuente de Claude Code si está próxima a caducar. Para fijar una
-revisión, sustituye `#main` por el hash completo del commit deseado. Para actualizar
-solo esta instalación:
+Para actualizar solo esta instalación:
 
 ```sh
 opencode plugin update 'git+https://github.com/tamecl/opencode-claudeway.git#main'
 ```
 
-Usa este método **o** el directorio local descrito más abajo, no ambos. Instalar
-desde Git no cambia el carácter experimental ni las limitaciones de seguridad.
-Si ya lo instalaste por SSH, conserva ese origen al actualizar; no añadas una
-segunda copia por HTTPS.
+Para fijar una revisión, sustituye `#main` por el hash completo del commit deseado.
+Si ya lo instalaste por SSH o mediante una ruta local, conserva ese origen; no
+añadas una segunda copia por HTTPS.
 
-## Desarrollo local
-
-OpenCode objetivo: `2.0.29`. Node para desarrollo: `24.12+`. pnpm: `10.32.1`.
-Todo el código y las pruebas usan JavaScript ESM; no se requiere Python,
-TypeScript, compilación ni dependencias nativas nuevas.
+Si el plugin no aparece activo, puedes reiniciar el servicio. Ten en cuenta que
+esto puede interrumpir otras sesiones:
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm test
-pnpm run lint
-pnpm pack
+opencode service restart
+opencode plugin list
 ```
 
-Si pnpm no está instalado, puedes sustituir `pnpm` por
-`npx --yes pnpm@10.32.1`; no hace falta instalar herramientas globales.
+</details>
 
-Las pruebas ordinarias no usan credenciales reales ni hacen llamadas a
-Anthropic. Las pruebas del host aíslan configuración, datos y entorno en
-directorios temporales y utilizan SQLite en memoria.
+<details>
+<summary><strong>Alternativa: cargar el directorio local</strong></summary>
 
-### Qué mantener
-
-- `src/storage.js`: archivo/Keychain, validación, persistencia privada y bloqueo entre procesos.
-- `src/credentials.js`: renovación OAuth bajo demanda, concurrencia y recuperación.
-- `src/transforms.js`: billing, identidad, instrucciones, Haiku e historial de herramientas.
-- `src/index.js`: adaptador nativo de OpenCode y destinos permitidos.
-- `src/errors.js`: códigos y mensajes sanitizados.
-- `src/compatibility.js`: cabeceras, fallback acotado y restauración de herramientas en streaming.
-- `test/*.test.js`: pruebas JS, incluidas renovación, procesos separados y host V2 real con transporte simulado.
-- `scripts/diagnostics.mjs`: comparación sanitizada con la referencia y clasificación de errores del probe manual.
-
-El paquete carga `src/index.js` directamente, sin `dist/`, shell, servidor ni
-intérprete auxiliar. En macOS utiliza `/usr/bin/security`; las escrituras envían
-el secreto por stdin, nunca por argumentos ni variables de entorno. No registra
-tokens, prompts ni respuestas OAuth en logs.
-
-## Renovación automática
-
-Al conectar Claudeway o solicitar un modelo, renueva si quedan **cinco minutos o
-menos**. Sin caducidad próxima no hace llamadas ni escrituras adicionales. No
-necesita temporizadores y no lanza Claude Code para generar una respuesta.
-
-- Una Promise compartida y un bloqueo de archivo coordinan procesos de Claudeway.
-- Relee la fuente antes de renovar y antes de escribir; conserva scopes y otros campos.
-- La petición OAuth tiene un destino fijo, timeout y redirecciones bloqueadas.
-- Guarda los tokens nuevos en el mismo archivo/servicio y devuelve el grant al
-  callback OAuth de V2. Los archivos se reemplazan atómicamente con permisos privados.
-- Un registro `.claudeway-refresh.json` en el directorio seleccionado conserva
-  tokens renovados **solo mientras una escritura esté pendiente**, con permisos
-  `0600`. Después queda un recibo con hashes, sin tokens. No lo compartas ni borres
-  a ciegas si hay una recuperación pendiente.
-- Un timeout o respuesta ambigua bloquea la repetición del refresh anterior: podría
-  haberse rotado. Puede requerir iniciar sesión de nuevo. Los rechazos explícitos
-  transitorios tienen cooldown; los terminales piden reautenticación.
-
-El bloqueo no obliga a Claude Code a coordinarse con nosotros: las relecturas
-detectan cambios, pero no garantizan exclusión absoluta frente a otros clientes.
-Un fallo antes de persistir la respuesta OAuth tampoco puede recuperarse siempre
-después de un cierre del proceso. Keychain rechaza actualizaciones que excedan la
-línea segura de `security -i` (4094 bytes), sin truncarlas.
-La renovación en Windows queda deshabilitada hasta verificar ACLs privadas para
-el registro de recuperación; la lectura de credenciales vigentes sigue disponible.
-
-Existe un probe manual, **fuera de las pruebas ordinarias**:
-
-```sh
-node scripts/verify-live.mjs --confirm --max-requests=3
-```
-
-Lee credenciales reales y envía una petición mínima con hasta dos reintentos de
-compatibilidad. `--max-requests=1` es el valor predeterminado; el presupuesto total
-incluye los envíos internos. Cada envío exige Bearer, ausencia de API key, destino
-oficial y un máximo de ocho tokens de salida. El probe bloquea redirecciones en su
-transporte aislado; no instala ese guard en producción. No renueva tokens ni
-escribe sus fuentes. No lo ejecutes sin autorizar expresamente ese uso.
-El probe deshabilita expresamente la nueva renovación automática: si el token está
-caducado o a sesenta segundos o menos de caducar, se detiene sin escribir.
-Su informe incluye diferencias estructurales frente al original: betas ausentes,
-presencia de cabeceras y marcadores del cuerpo, sin valores de credenciales,
-prompts, identificadores de sesión ni mensajes de error crudos. Los indicadores
-no demuestran cuál de las adaptaciones resolvió por sí sola el error anterior.
-El probe bloquea peticiones sin Bearer o con una API key inesperada, espera a que
-OAuth termine y distingue las etapas de inicialización, credenciales y petición.
-
-## Alternativa: cargar el directorio local
-
-Después de instalar las dependencias, carga el directorio del paquete en la
+Después de instalar las dependencias del repositorio, añade su ruta a la
 configuración V2 del proyecto donde quieras probarlo:
 
 ```jsonc
@@ -166,46 +104,137 @@ configuración V2 del proyecto donde quieras probarlo:
 }
 ```
 
-En `/connect`, elige Anthropic y **Claude Code credentials (Claudeway)**.
-La selección es explícita: cargar el plugin no lee credenciales, no conecta una
-cuenta y no reemplaza automáticamente una API key existente. La importación usa
-las APIs públicas de autenticación de V2; OpenCode administra el grant guardado.
+Luego activa Claudeway mediante `/connect`, como en la instalación manual.
+Usa el directorio local **o** la instalación desde Git, no ambos.
 
-El paquete no está publicado en npm y su nombre no está reservado. Se puede
-instalar desde GitHub como se indica arriba. Los cambios de este repositorio no
-modifican tu configuración global: la instalación ocurre cuando ejecutas
-`opencode plugin add` o añades explícitamente la ruta a tu configuración.
+El paquete no está publicado en npm y su nombre no está reservado.
+`private: true` evita su publicación accidental; no impide instalarlo desde Git.
 
-## Fuente y límites actuales
+</details>
 
-- Una fuente: Keychain de macOS o `.credentials.json` de Claude Code.
-- Respeta `CLAUDE_CONFIG_DIR`; no enumera otras cuentas ni directorios.
-- En macOS, solo utiliza el archivo si no existe el ítem Keychain correspondiente.
-- La renovación actualiza la fuente seleccionada de Claude Code; no escribe `auth.json`.
-- El modo de diagnóstico sin renovación rechaza el límite de sesenta segundos.
-- No incluye multicuenta, routing, proxy, telemetría ni refresco en segundo plano.
-- No genera logs de credenciales, prompts ni cuerpos de error.
-- Solo adapta peticiones de la conexión Claudeway activa. Conserva las demás conexiones.
-- El fallback de errores 400/429 conocidos elimina únicamente betas que estaban
-  presentes, con un máximo de dos reintentos por respuesta; no recupera errores 401.
+## Renovación automática
 
-**Cambio de prioridad de instrucciones:** la compatibilidad mueve las instrucciones
-de OpenCode desde `system` al primer mensaje de usuario, dejando billing e identidad
-en `system`. No es semánticamente equivalente: reduce la prioridad de esas
-instrucciones. No modifica las comprobaciones de permisos de OpenCode.
+Al conectar Claudeway o solicitar un modelo, renueva si quedan **cinco minutos o
+menos** de validez. Sin caducidad próxima, no hace llamadas ni escrituras
+adicionales.
 
+- **Coordinación:** una Promise compartida y un bloqueo de archivo coordinan
+  procesos de Claudeway. La fuente se relee antes de renovar y antes de escribir.
+- **Persistencia:** conserva scopes y otros metadatos, actualiza la misma fuente
+  y devuelve el grant al callback OAuth de V2. Los archivos se reemplazan de forma
+  atómica con permisos privados.
+- **Recuperación:** `.claudeway-refresh.json` conserva los tokens nuevos solo si
+  hay una escritura pendiente, con permisos POSIX `0600`. Después queda un recibo
+  con hashes, sin tokens. **No lo compartas ni lo borres a ciegas.**
+- **Fallos acotados:** la petición OAuth tiene destino fijo, timeout y redirecciones
+  bloqueadas. Los rechazos transitorios tienen cooldown; los terminales piden
+  reautenticación. Un resultado incierto no repite el refresh token anterior.
+
+Claude Code no está obligado a respetar nuestro bloqueo. Las relecturas reducen
+carreras, pero no garantizan exclusión absoluta frente a otros clientes ni
+recuperación tras un cierre antes de persistir la respuesta OAuth.
+
+## Seguridad y límites
+
+### Qué está comprobado
+
+| Recorrido | Evidencia actual |
+| :--- | :--- |
+| Generación real con suscripción | La versión anterior obtuvo **HTTP 200 y `OK`** con Haiku, sin API key. |
+| Implementación JS y renovación | Verificadas con fixtures y el host SDK V2; **sin renovación real** en esta etapa. |
+| macOS | Pruebas locales ejecutadas; Keychain simulado. |
+| Linux / Windows | Pendientes. En Windows la renovación está deshabilitada hasta verificar ACLs privadas. |
+
+### Límites que debes conocer
+
+- **Redirecciones:** el host puede seguir el primer envío y reenviar el cuerpo.
+  Bloquear redirecciones en OAuth o en el verificador no corrige ese transporte.
+- **Prioridad de instrucciones:** la compatibilidad mueve instrucciones desde
+  `system` al primer mensaje de usuario, reduciendo su prioridad. No es equivalente
+  a mantenerlas en `system`; las comprobaciones de permisos de OpenCode no cambian.
+- **Keychain:** se rechazan actualizaciones que excedan la línea segura de
+  `security -i` —4094 bytes—, sin truncarlas.
+- **Fuente única:** respeta `CLAUDE_CONFIG_DIR`; no descubre otras cuentas. En macOS
+  solo usa el archivo si no existe el ítem Keychain correspondiente.
+- **Sin registros de secretos:** no registra tokens, prompts ni cuerpos de error.
+  Las escrituras Keychain viajan por stdin, nunca por argumentos ni entorno.
+- **Alcance limitado:** no incluye multicuenta, routing, proxy, telemetría ni
+  refresco en segundo plano. El fallback de 400/429 conocidos quita solo betas
+  presentes, con hasta dos reintentos; no recupera errores 401.
+
+La renovación modifica la fuente seleccionada de Claude Code, no `auth.json`.
 El uso de credenciales de suscripción en clientes no oficiales puede estar
-restringido por las condiciones de Anthropic y dejar de funcionar. Las referencias
-comunitarias no constituyen una autorización del servicio.
+restringido por las condiciones de Anthropic y dejar de funcionar.
+
+Consulta el [informe de compatibilidad](docs/compatibility.md) para los resultados,
+el historial de diagnóstico y las limitaciones completas.
+
+## Desarrollo
+
+**Node `24.12+` · pnpm `10.32.1` · OpenCode `2.0.29`**
+
+```sh
+pnpm install --frozen-lockfile
+pnpm test
+pnpm run lint
+pnpm pack
+```
+
+Si no tienes pnpm, sustituye `pnpm` por `npx --yes pnpm@10.32.1`.
+El paquete carga `src/index.js` directamente, sin `dist/` ni intérprete auxiliar.
+Las pruebas ordinarias no usan credenciales reales ni llaman a Anthropic: aíslan
+el entorno y utilizan fixtures, SQLite en memoria y transporte simulado.
+
+<details>
+<summary><strong>Mapa del proyecto</strong></summary>
+
+| Archivo | Responsabilidad |
+| :--- | :--- |
+| [`src/index.js`](src/index.js) | Integración V2 y destinos permitidos. |
+| [`src/storage.js`](src/storage.js) | Archivo/Keychain, validación, persistencia y bloqueo. |
+| [`src/credentials.js`](src/credentials.js) | Renovación OAuth, concurrencia y recuperación. |
+| [`src/transforms.js`](src/transforms.js) | Billing, identidad, instrucciones, Haiku y herramientas. |
+| [`src/compatibility.js`](src/compatibility.js) | Cabeceras, fallback y streaming. |
+| [`src/errors.js`](src/errors.js) | Códigos y mensajes sanitizados. |
+| [`test/`](test) | Pruebas de comportamiento y del host V2. |
+| [`scripts/diagnostics.mjs`](scripts/diagnostics.mjs) | Comparación sanitizada y diagnóstico del probe manual. |
+
+</details>
+
+<details>
+<summary><strong>Prueba real optativa — requiere autorización</strong></summary>
+
+Este verificador queda **fuera de las pruebas ordinarias**. Lee credenciales reales
+y puede consumir uso de la cuenta. No lo ejecutes sin autorizar expresamente ese uso.
+
+```sh
+node scripts/verify-live.mjs --confirm --max-requests=3
+```
+
+- Permite una petición mínima y hasta dos reintentos, dentro del presupuesto total.
+  El valor predeterminado de `--max-requests` es `1`; cada envío tiene un máximo de
+  ocho tokens de salida y exige Bearer, ausencia de API key y destino oficial.
+- **No renueva tokens ni escribe sus fuentes.** Deshabilita la renovación automática
+  y rechaza credenciales a sesenta segundos o menos de caducar.
+- Bloquea redirecciones en su transporte aislado, no en el plugin de producción.
+- Espera que OAuth termine y distingue inicialización, credenciales y petición.
+  El informe omite tokens, prompts, IDs de sesión y errores crudos; sus diferencias
+  estructurales no demuestran qué adaptación resolvió por sí sola el error anterior.
+
+</details>
 
 ## Retirada
 
 Retira la entrada de `plugins` y recarga OpenCode. Si conectaste una cuenta de
-prueba, elimina solo esa cuenta desde la interfaz nativa de OpenCode. No borres
-las credenciales de Claude Code. El plugin no mantiene temporizadores ni procesos
+prueba, elimina solo esa cuenta desde la interfaz nativa; **no borres las
+credenciales de Claude Code**. El plugin no mantiene temporizadores ni procesos
 persistentes.
 
-## Licencia
+## Créditos y licencia
 
-MIT. Consulta [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) para la atribución
-original y el estado de revisión de dependencias.
+Proyecto independiente basado en una migración selectiva de
+[opencode-claude-auth](https://github.com/griffinmartin/opencode-claude-auth), no en
+una modificación de ese repositorio. Las referencias comunitarias no constituyen
+una autorización del servicio.
+
+[MIT](LICENSE) · [Atribuciones y dependencias](THIRD_PARTY_NOTICES.md)
