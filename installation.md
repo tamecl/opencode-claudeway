@@ -3,9 +3,8 @@
 These instructions are for AI coding agents asked to install and configure
 `opencode-claudeway`. Install from GitHub, not npm. The repository is public.
 
-**Experimental:** minimal subscription generation succeeded in the previous
-version; the current JavaScript implementation and OAuth renewal have only been
-validated with fixtures. The native host still has a request-redirect limitation.
+**Experimental:** the current JavaScript implementation has been tested, but OAuth
+renewal is still under review. The native host still has a request-redirect limitation.
 Installing the plugin does not establish that it works with the user's account.
 
 ## 1. Check prerequisites without reading credentials

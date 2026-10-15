@@ -17,9 +17,9 @@ Integración no oficial con renovación OAuth bajo demanda. Sin API key.
 </div>
 
 > [!WARNING]
-> **Experimental y no oficial.** La versión JS y la renovación solo se han validado
-> con credenciales ficticias. OpenCode `2.0.29` todavía impide garantizar el bloqueo
-> de redirecciones del primer envío nativo. No está listo para distribución general.
+> **Experimental y no oficial.** La renovación OAuth sigue en revisión. OpenCode
+> `2.0.29` todavía impide garantizar el bloqueo de redirecciones del primer envío
+> nativo. No está listo para distribución general.
 
 ## Qué ofrece
 

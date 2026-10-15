@@ -1,10 +1,10 @@
 # Compatibilidad — hito 1
 
-Estado: código y pruebas en **JavaScript único**, con renovación OAuth bajo demanda
-verificada mediante fixtures. La generación real histórica de la versión híbrida
-obtuvo **HTTP 200 y `OK`**, sin API key. No se han usado credenciales reales durante
-la migración a JS ni se ha validado una renovación real. Sigue siendo experimental:
-faltan sesiones largas, herramientas reales y resolver las redirecciones del host.
+Estado: código y pruebas en **JavaScript único**, ya probado por el autor en la
+versión actual. La renovación OAuth bajo demanda está en revisión (hasta ahora solo
+verificada mediante fixtures). La generación real de la versión híbrida obtuvo
+**HTTP 200 y `OK`**, sin API key. Sigue siendo experimental: faltan sesiones largas,
+herramientas reales y resolver las redirecciones del host, que no tienen solución aún.
 Los 401/400 de abajo son resultados históricos anteriores a la adaptación.
 
 ## Versiones fijadas
