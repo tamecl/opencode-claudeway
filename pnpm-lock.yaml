@@ -15,15 +15,9 @@ importers:
       '@opencode/sdk':
         specifier: 2.0.29
         version: 2.0.29(@aws-sdk/credential-provider-node@3.972.86)(@opentelemetry/api@1.9.0)(@opentelemetry/semantic-conventions@1.43.0)(@opentui/core@0.5.17(typescript@5.8.2)(web-tree-sitter@0.25.10))(@smithy/signature-v4@5.7.4)(graphql@16.14.2)(redis@6.3.0(@opentelemetry/api@1.9.0))(typescript@5.8.2)(web-tree-sitter@0.25.10)(ws@8.22.0)
-      '@types/node':
-        specifier: 24.12.2
-        version: 24.12.2
       oxlint:
         specifier: 1.56.0
         version: 1.56.0
-      typescript:
-        specifier: 5.8.2
-        version: 5.8.2
 
 packages:
 

@@ -5,10 +5,16 @@ migration research reference `griffinmartin/opencode-claude-auth` `2.2.1`, commi
 `8aad811a4da3813ab3985063e656fed582909780`:
 https://github.com/griffinmartin/opencode-claude-auth
 
-The V1 entrypoint, `auth.json` synchronization, account discovery, prompts,
-request transformations and renewal implementation have not been copied into
-this compatibility milestone. The original notice is retained below for the
-reference and any selectively derived work.
+The credential reader and request compatibility logic are selectively derived from
+this reference: client headers, beta flags, billing-marker hashing, identity,
+system relocation, Haiku effort cleanup, tool naming, placeholder repair, and
+bounded beta fallback. These adaptations now apply to production requests for the
+explicitly selected Claudeway connection. The original notice is retained below.
+The OAuth endpoint, public client identifier and token exchange fields also reference
+`src/credentials.ts` at that commit. Claudeway implements its own on-demand renewal,
+private recovery records, locking and JS persistence. The V1 entrypoint,
+`auth.json` synchronization, account discovery, full prompts, optional lossy repair
+mode, CLI-generation fallback and background renewal timers have not been copied.
 
 ## opencode-claude-auth
 
@@ -38,9 +44,9 @@ SOFTWARE.
 
 `@opencode/plugin` `2.0.29` is MIT-licensed. It and its transitive dependencies
 remain separate packages with their original notices; none are bundled here.
-`@opencode/sdk`, TypeScript, Node type declarations and oxlint are development
-dependencies only. A complete dependency-license review remains required before
-distribution. This package is marked private and has not been published.
+`@opencode/sdk` and oxlint are development dependencies only. The JavaScript core
+uses built-in Node APIs without additional dependencies. A complete dependency-license review remains
+required before distribution. This package is marked private and has not been published.
 
 CLIProxyAPI was consulted as an architectural reference; no code from it has
 been copied into this milestone. Source-code licenses do not authorize use of

@@ -5,21 +5,23 @@ en OpenCode V2. Basado en una migración selectiva de
 [opencode-claude-auth](https://github.com/griffinmartin/opencode-claude-auth), no en
 una modificación de ese repositorio.
 
-**Estado: hito 1 bloqueado por autenticación. No está listo para uso normal.** La
-integración funciona con el host V2 real y un transporte simulado, pero una prueba
-autorizada con Anthropic devolvió **401 `authentication_error`**. No renueva tokens ni adapta todavía las peticiones
-para compatibilidad con Claude Code. Existe además una limitación de
-redirecciones del host que no permite garantizar su bloqueo; consulta
+**Estado: JavaScript único, con renovación OAuth automática bajo demanda; experimental.**
+La versión anterior validó una generación real: **HTTP 200 y `OK`** con
+`claude-haiku-4-5`, Bearer OAuth y sin API key, después de corregir el `400 extra-usage`.
+La migración JS y la renovación se han validado solo con fixtures: **no se han
+renovado ni escrito credenciales reales en esta etapa**.
+No está listo para distribución: sigue existiendo una limitación de
+redirecciones del host que no permite garantizar su bloqueo en producción; consulta
 [`docs/compatibility.md`](docs/compatibility.md).
 
 ## Desarrollo local
 
 OpenCode objetivo: `2.0.29`. Node para desarrollo: `24.12+`. pnpm: `10.32.1`.
+Todo el código y las pruebas usan JavaScript ESM; no se requiere Python,
+TypeScript, compilación ni dependencias nativas nuevas.
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm run typecheck
-pnpm run build
 pnpm test
 pnpm run lint
 pnpm pack
@@ -32,14 +34,74 @@ Las pruebas ordinarias no usan credenciales reales ni hacen llamadas a
 Anthropic. Las pruebas del host aíslan configuración, datos y entorno en
 directorios temporales y utilizan SQLite en memoria.
 
-Existe un probe manual `pnpm run verify:live -- --confirm`, **fuera de las pruebas
-ordinarias**: lee credenciales reales y envía una petición mínima, sin renovar
-tokens ni escribir sus fuentes. No lo ejecutes sin autorizar expresamente ese uso.
+### Qué mantener
+
+- `src/storage.js`: archivo/Keychain, validación, persistencia privada y bloqueo entre procesos.
+- `src/credentials.js`: renovación OAuth bajo demanda, concurrencia y recuperación.
+- `src/transforms.js`: billing, identidad, instrucciones, Haiku e historial de herramientas.
+- `src/index.js`: adaptador nativo de OpenCode y destinos permitidos.
+- `src/errors.js`: códigos y mensajes sanitizados.
+- `src/compatibility.js`: cabeceras, fallback acotado y restauración de herramientas en streaming.
+- `test/*.test.js`: pruebas JS, incluidas renovación, procesos separados y host V2 real con transporte simulado.
+- `scripts/diagnostics.mjs`: comparación sanitizada con la referencia y clasificación de errores del probe manual.
+
+El paquete carga `src/index.js` directamente, sin `dist/`, shell, servidor ni
+intérprete auxiliar. En macOS utiliza `/usr/bin/security`; las escrituras envían
+el secreto por stdin, nunca por argumentos ni variables de entorno. No registra
+tokens, prompts ni respuestas OAuth en logs.
+
+## Renovación automática
+
+Al conectar Claudeway o solicitar un modelo, renueva si quedan **cinco minutos o
+menos**. Sin caducidad próxima no hace llamadas ni escrituras adicionales. No
+necesita temporizadores y no lanza Claude Code para generar una respuesta.
+
+- Una Promise compartida y un bloqueo de archivo coordinan procesos de Claudeway.
+- Relee la fuente antes de renovar y antes de escribir; conserva scopes y otros campos.
+- La petición OAuth tiene un destino fijo, timeout y redirecciones bloqueadas.
+- Guarda los tokens nuevos en el mismo archivo/servicio y devuelve el grant al
+  callback OAuth de V2. Los archivos se reemplazan atómicamente con permisos privados.
+- Un registro `.claudeway-refresh.json` en el directorio seleccionado conserva
+  tokens renovados **solo mientras una escritura esté pendiente**, con permisos
+  `0600`. Después queda un recibo con hashes, sin tokens. No lo compartas ni borres
+  a ciegas si hay una recuperación pendiente.
+- Un timeout o respuesta ambigua bloquea la repetición del refresh anterior: podría
+  haberse rotado. Puede requerir iniciar sesión de nuevo. Los rechazos explícitos
+  transitorios tienen cooldown; los terminales piden reautenticación.
+
+El bloqueo no obliga a Claude Code a coordinarse con nosotros: las relecturas
+detectan cambios, pero no garantizan exclusión absoluta frente a otros clientes.
+Un fallo antes de persistir la respuesta OAuth tampoco puede recuperarse siempre
+después de un cierre del proceso. Keychain rechaza actualizaciones que excedan la
+línea segura de `security -i` (4094 bytes), sin truncarlas.
+La renovación en Windows queda deshabilitada hasta verificar ACLs privadas para
+el registro de recuperación; la lectura de credenciales vigentes sigue disponible.
+
+Existe un probe manual, **fuera de las pruebas ordinarias**:
+
+```sh
+node scripts/verify-live.mjs --confirm --max-requests=3
+```
+
+Lee credenciales reales y envía una petición mínima con hasta dos reintentos de
+compatibilidad. `--max-requests=1` es el valor predeterminado; el presupuesto total
+incluye los envíos internos. Cada envío exige Bearer, ausencia de API key, destino
+oficial y un máximo de ocho tokens de salida. El probe bloquea redirecciones en su
+transporte aislado; no instala ese guard en producción. No renueva tokens ni
+escribe sus fuentes. No lo ejecutes sin autorizar expresamente ese uso.
+El probe deshabilita expresamente la nueva renovación automática: si el token está
+caducado o a sesenta segundos o menos de caducar, se detiene sin escribir.
+Su informe incluye diferencias estructurales frente al original: betas ausentes,
+presencia de cabeceras y marcadores del cuerpo, sin valores de credenciales,
+prompts, identificadores de sesión ni mensajes de error crudos. Los indicadores
+no demuestran cuál de las adaptaciones resolvió por sí sola el error anterior.
+El probe bloquea peticiones sin Bearer o con una API key inesperada, espera a que
+OAuth termine y distingue las etapas de inicialización, credenciales y petición.
 
 ## Configuración local para la prueba de compatibilidad
 
-Después de compilar, carga el directorio del paquete en la configuración V2
-del proyecto donde quieras probarlo:
+Después de instalar las dependencias, carga el directorio del paquete en la
+configuración V2 del proyecto donde quieras probarlo:
 
 ```jsonc
 {
@@ -61,10 +123,18 @@ No se ha modificado tu configuración global ni instalado el plugin en tu cuenta
 - Una fuente: Keychain de macOS o `.credentials.json` de Claude Code.
 - Respeta `CLAUDE_CONFIG_DIR`; no enumera otras cuentas ni directorios.
 - En macOS, solo utiliza el archivo si no existe el ítem Keychain correspondiente.
-- No escribe en las fuentes de Claude Code ni en `auth.json`.
-- Rechaza tokens caducados o a menos de 60 segundos de caducar.
+- La renovación actualiza la fuente seleccionada de Claude Code; no escribe `auth.json`.
+- El modo de diagnóstico sin renovación rechaza el límite de sesenta segundos.
 - No incluye multicuenta, routing, proxy, telemetría ni refresco en segundo plano.
 - No genera logs de credenciales, prompts ni cuerpos de error.
+- Solo adapta peticiones de la conexión Claudeway activa. Conserva las demás conexiones.
+- El fallback de errores 400/429 conocidos elimina únicamente betas que estaban
+  presentes, con un máximo de dos reintentos por respuesta; no recupera errores 401.
+
+**Cambio de prioridad de instrucciones:** la compatibilidad mueve las instrucciones
+de OpenCode desde `system` al primer mensaje de usuario, dejando billing e identidad
+en `system`. No es semánticamente equivalente: reduce la prioridad de esas
+instrucciones. No modifica las comprobaciones de permisos de OpenCode.
 
 El uso de credenciales de suscripción en clientes no oficiales puede estar
 restringido por las condiciones de Anthropic y dejar de funcionar. Las referencias
@@ -74,7 +144,8 @@ comunitarias no constituyen una autorización del servicio.
 
 Retira la entrada de `plugins` y recarga OpenCode. Si conectaste una cuenta de
 prueba, elimina solo esa cuenta desde la interfaz nativa de OpenCode. No borres
-las credenciales de Claude Code. El plugin no mantiene temporizadores ni procesos.
+las credenciales de Claude Code. El plugin no mantiene temporizadores ni procesos
+persistentes.
 
 ## Licencia
 
