@@ -1,9 +1,9 @@
 {
   "name": "@tamelabs/opencode-claudeway",
-  "version": "0.1.1",
-  "description": "Unofficial Claude Code credential integration for OpenCode V2",
+  "version": "0.1.2",
+  "description": "Use your Claude Pro/Max subscription in OpenCode V2 via Claude Code credentials, no API key",
   "license": "MIT",
-  "keywords": ["opencode", "opencode-v2", "opencode-plugin", "claude-code", "anthropic", "oauth"],
+  "keywords": ["opencode", "opencode-v2", "opencode-plugin", "claude-code", "claude", "claude-pro", "claude-max", "claude-subscription", "anthropic", "oauth", "ai-coding"],
   "homepage": "https://github.com/tamecl/opencode-claudeway#readme",
   "bugs": "https://github.com/tamecl/opencode-claudeway/issues",
   "repository": {
