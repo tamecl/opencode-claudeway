@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
 import { requestHeaders, restoreResponse, compatibleResponse } from "../src/compatibility.js"
-import { requestAdapter } from "opencode-claudeway"
+import { requestAdapter } from "@tamelabs/opencode-claudeway"
 
 const payload = { model: "claude-haiku-4-5", messages: [{ role: "user", content: "fixture prompt" }], max_tokens: 8 }
 const failure = (status = 400, message = "You're out of extra usage") => new Response(JSON.stringify({ type: "error", error: { type: "invalid_request_error", message } }), { status, headers: { "content-type": "application/json" } })

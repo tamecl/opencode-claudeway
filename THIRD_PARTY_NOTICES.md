@@ -45,8 +45,8 @@ SOFTWARE.
 `@opencode/plugin` `2.0.29` is MIT-licensed. It and its transitive dependencies
 remain separate packages with their original notices; none are bundled here.
 `@opencode/sdk` and oxlint are development dependencies only. The JavaScript core
-uses built-in Node APIs without additional dependencies. A complete dependency-license review remains
-required before distribution. This package is marked private and has not been published.
+uses built-in Node APIs without additional dependencies; no third-party code is
+bundled in the published package.
 
 CLIProxyAPI was consulted as an architectural reference; no code from it has
 been copied into this milestone. Source-code licenses do not authorize use of

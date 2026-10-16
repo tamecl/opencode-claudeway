@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { mock, test } from "node:test"
-import plugin, { credentialReader } from "opencode-claudeway"
+import plugin, { credentialReader } from "@tamelabs/opencode-claudeway"
 
 const body = JSON.stringify({ model: "claude-haiku-4-5", messages: [{ role: "user", content: "fixture prompt" }] })
 

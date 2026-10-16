@@ -1,9 +1,10 @@
 # Install Claudeway in OpenCode V2
 
 These instructions are for AI coding agents asked to install and configure
-`opencode-claudeway`. Install from GitHub, not npm. The repository is public.
+`opencode-claudeway`. Install the npm package `@tamelabs/opencode-claudeway`
+(Tame's official npm account).
 
-**Experimental:** the current JavaScript implementation has been tested, but OAuth
+**Experimental, use at your own risk:** the current JavaScript implementation has been tested, but OAuth
 renewal is still under review. The native host still has a request-redirect limitation.
 Installing the plugin does not establish that it works with the user's account.
 
@@ -35,16 +36,15 @@ or local-path installation unless the user explicitly requests migration.
 Otherwise, run:
 
 ```sh
-opencode plugin add 'git+https://github.com/tamecl/opencode-claudeway.git#main'
+opencode plugin add @tamelabs/opencode-claudeway
 ```
 
-This command installs the Git package and adds it to OpenCode's global plugin
-configuration. OpenCode manages dependencies. Do not publish to npm, run a global
-npm installation, clone a second copy, or introduce a compilation step.
+This command installs the package and adds it to OpenCode's global plugin
+configuration. OpenCode manages dependencies. Do not run a global npm
+installation, clone a second copy, or introduce a compilation step.
 
 Do not replace the user's configuration, remove other plugins, or disable
 existing providers. Do not print the full configuration: it may contain secrets.
-The package's `private: true` flag prevents npm publication, not Git installation.
 
 ## 3. Verify installation without account requests
 

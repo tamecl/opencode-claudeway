@@ -1,36 +1,46 @@
-name: Reporte de error
-description: Algo no funciona como se espera
+name: Bug report
+description: Something does not work as expected
 labels: [bug]
 body:
   - type: markdown
     attributes:
       value: |
-        **No pegues tokens, credenciales ni el contenido de `.claudeway-refresh.json`.**
-        Para vulnerabilidades, usa el [aviso privado](https://github.com/tamecl/opencode-claudeway/security/advisories/new).
+        **Do not paste tokens, credentials or the contents of `.claudeway-refresh.json`.**
+        For vulnerabilities, use a [private advisory](https://github.com/tamecl/opencode-claudeway/security/advisories/new).
   - type: input
     id: opencode
     attributes:
-      label: Versión de OpenCode
+      label: OpenCode version
       placeholder: "2.0.29"
     validations:
       required: true
   - type: input
     id: plugin
     attributes:
-      label: Versión o commit de Claudeway
-      placeholder: "0.1.0-alpha.1"
+      label: Claudeway version or commit
+      placeholder: "0.1.0"
     validations:
       required: true
   - type: input
     id: os
     attributes:
-      label: Sistema operativo
+      label: Operating system
       placeholder: macOS 15
+    validations:
+      required: true
+  - type: dropdown
+    id: token
+    attributes:
+      label: Credential source
+      options:
+        - Claude Code credentials (shared refresh token)
+        - Dedicated Claudeway token (claude setup-token)
     validations:
       required: true
   - type: textarea
     id: what
     attributes:
-      label: Qué ocurre y cómo reproducirlo
+      label: What happens and how to reproduce it
+      description: Include the error message shown by OpenCode (it is sanitized and contains no tokens).
     validations:
       required: true

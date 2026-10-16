@@ -2,88 +2,94 @@
 
 # Claudeway
 
-**Tu sesión de Claude Code, dentro de OpenCode.**
+**Your Claude Code session, inside OpenCode.**
 
-Integración no oficial con renovación OAuth bajo demanda. Sin API key.
+Unofficial integration with on-demand OAuth renewal. No API key.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/tamecl/opencode-claudeway/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/tamecl/opencode-claudeway/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@tamelabs/opencode-claudeway?style=flat-square)](https://www.npmjs.com/package/@tamelabs/opencode-claudeway)
 [![OpenCode 2.0.29](https://img.shields.io/badge/OpenCode-2.0.29-24292f?style=flat-square)](https://opencode.ai/v2/docs/plugins)
-[![JavaScript ESM](https://img.shields.io/badge/JavaScript-ESM-f7df1e?style=flat-square)](package.json)
-[![Estado experimental](https://img.shields.io/badge/estado-experimental-d29922?style=flat-square)](docs/compatibility.md)
-[![Licencia MIT](https://img.shields.io/badge/licencia-MIT-3fb950?style=flat-square)](LICENSE)
+[![Status: experimental](https://img.shields.io/badge/status-experimental-d29922?style=flat-square)](docs/compatibility.md)
+[![MIT License](https://img.shields.io/badge/license-MIT-3fb950?style=flat-square)](LICENSE)
 
-[Instalación](#instalación) · [Renovación](#renovación-automática) · [Seguridad](#seguridad-y-límites) · [Desarrollo](#desarrollo) · [Guía para agentes](installation.md)
+[Español](README.es.md) · [Install](#install) · [Renewal](#automatic-renewal) · [Security](#security-and-limits) · [Development](#development) · [Agent guide](installation.md)
 
 </div>
 
 > [!WARNING]
-> **Experimental y no oficial.** La renovación OAuth sigue en revisión. OpenCode
-> `2.0.29` todavía impide garantizar el bloqueo de redirecciones del primer envío
-> nativo. No está listo para distribución general.
+> **Experimental, unofficial, use at your own risk.** OAuth renewal is still under
+> review. OpenCode `2.0.29` cannot yet guarantee that redirects are blocked on the
+> first native request. Using subscription credentials in unofficial clients may be
+> restricted by Anthropic's terms and could stop working at any time.
 
-## Qué ofrece
+## What it does
 
-| Función | Cómo funciona |
+| Feature | How it works |
 | :--- | :--- |
-| **Tu suscripción existente** | Utiliza OAuth de Claude Code, no una conexión con API key. |
-| **Renovación bajo demanda** | Renueva al usar el modelo, sin temporizadores ni generaciones auxiliares del CLI. |
-| **Integración nativa** | Se activa explícitamente en OpenCode V2 y conserva las demás conexiones. |
-| **JavaScript de principio a fin** | Sin Python, compilación ni dependencias nativas nuevas. |
+| **Your existing subscription** | Uses Claude Code OAuth, not an API-key connection. |
+| **On-demand renewal** | Renews when you use the model: no timers, no helper CLI generations. |
+| **Native integration** | Explicitly enabled in OpenCode V2; your other connections stay untouched. |
+| **JavaScript end to end** | No Python, no build step, no new native dependencies. |
 
-## Instalación
+## Install
 
-Necesitas **OpenCode V2** —verificado con `2.0.29`— y una sesión existente en
-Claude Code. El repositorio es público; no hace falta configurar SSH ni publicar
-el paquete en npm.
+You need **OpenCode V2** (tested with `2.0.29`) and an existing Claude Code
+session. The package is published on npm as `@tamelabs/opencode-claudeway`,
+Tame's official npm account.
 
-### Con un agente
+### With an agent
 
-Copia y pega esta línea en OpenCode:
+Paste this line into OpenCode:
 
 ```text
 Install the opencode-claudeway plugin and configure it by following: https://raw.githubusercontent.com/tamecl/opencode-claudeway/main/installation.md
 ```
 
-La [guía para agentes](installation.md) instala y comprueba el plugin sin leer
-credenciales ni hacer consultas a Anthropic. La activación de la cuenta queda en
-manos del usuario.
+The [agent guide](installation.md) installs and checks the plugin without reading
+credentials or calling Anthropic. Activating the account is left to you.
 
-### Manualmente
+### Manually
 
 ```sh
-opencode plugin add 'git+https://github.com/tamecl/opencode-claudeway.git#main'
+opencode plugin add @tamelabs/opencode-claudeway
 opencode plugin list
 ```
 
-OpenCode instala las dependencias y añade el plugin a su configuración **global**.
-No necesitas clonar el repositorio, instalar pnpm ni compilar.
+OpenCode installs the dependencies and adds the plugin to its **global**
+configuration. No cloning, pnpm or build step required.
 
-Después, dentro de OpenCode:
+Then, inside OpenCode:
 
 1. **`/connect`** → Anthropic → **Claude Code credentials (Claudeway)**.
-2. Deja activa la cuenta Claudeway.
-3. **`/models`** → selecciona tu modelo Claude.
+2. Keep the Claudeway account active.
+3. **`/models`** → pick your Claude model.
 
 > [!IMPORTANT]
-> Conectar o usar Claudeway puede renovar tokens y actualizar la fuente de
-> credenciales de Claude Code. No copies tokens manualmente ni elijas el método
-> API key. Cargar el plugin, por sí solo, no conecta ninguna cuenta.
+> Connecting or using Claudeway may renew tokens and update Claude Code's
+> credential source. Do not copy tokens by hand or choose the API-key method.
+> Loading the plugin alone does not connect any account.
 
 <details>
-<summary><strong>Actualizar, fijar una revisión o reiniciar el servicio</strong></summary>
+<summary><strong>Update, pin a version, install from Git or restart the service</strong></summary>
 
-Para actualizar solo esta instalación:
+To update only this plugin:
 
 ```sh
-opencode plugin update 'git+https://github.com/tamecl/opencode-claudeway.git#main'
+opencode plugin update @tamelabs/opencode-claudeway
 ```
 
-Para fijar una revisión, sustituye `#main` por el hash completo del commit deseado.
-Si ya lo instalaste por SSH o mediante una ruta local, conserva ese origen; no
-añadas una segunda copia por HTTPS.
+To pin a version, use `@tamelabs/opencode-claudeway@0.1.0`. To try the main
+branch without npm:
 
-Si el plugin no aparece activo, puedes reiniciar el servicio. Ten en cuenta que
-esto puede interrumpir otras sesiones:
+```sh
+opencode plugin add 'git+https://github.com/tamecl/opencode-claudeway.git#main'
+```
+
+If you already installed it from Git, SSH or a local path, remove that entry
+before adding the npm one; do not keep two copies.
+
+If the plugin does not show as active, you can restart the service. This may
+interrupt other sessions:
 
 ```sh
 opencode service restart
@@ -93,95 +99,91 @@ opencode plugin list
 </details>
 
 <details>
-<summary><strong>Alternativa: cargar el directorio local</strong></summary>
+<summary><strong>Alternative: load the local directory</strong></summary>
 
-Después de instalar las dependencias del repositorio, añade su ruta a la
-configuración V2 del proyecto donde quieras probarlo:
+After installing the repository's dependencies, add its path to the V2
+configuration of the project where you want to try it:
 
 ```jsonc
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugins": ["/ruta/absoluta/opencode-claudeway"]
+  "plugins": ["/absolute/path/to/opencode-claudeway"]
 }
 ```
 
-Luego activa Claudeway mediante `/connect`, como en la instalación manual.
-Usa el directorio local **o** la instalación desde Git, no ambos.
-
-El paquete no está publicado en npm y su nombre no está reservado.
-`private: true` evita su publicación accidental; no impide instalarlo desde Git.
+Then enable Claudeway through `/connect`, as in the manual install.
+Use the local directory **or** the published package, not both.
 
 </details>
 
-## Renovación automática
+## Automatic renewal
 
-Al conectar Claudeway o solicitar un modelo, renueva si quedan **cinco minutos o
-menos** de validez. Sin caducidad próxima, no hace llamadas ni escrituras
-adicionales.
+When you connect Claudeway or request a model, it renews if **five minutes or
+less** of validity remain. Otherwise it makes no extra calls or writes.
 
-- **Coordinación:** una Promise compartida y un bloqueo de archivo coordinan
-  procesos de Claudeway. La fuente se relee antes de renovar y antes de escribir.
-- **Persistencia:** conserva scopes y otros metadatos, actualiza la misma fuente
-  y devuelve el grant al callback OAuth de V2. Los archivos se reemplazan de forma
-  atómica con permisos privados.
-- **Recuperación:** `.claudeway-refresh.json` conserva los tokens nuevos solo si
-  hay una escritura pendiente, con permisos POSIX `0600`. Después queda un recibo
-  con hashes, sin tokens. **No lo compartas ni lo borres a ciegas.**
-- **Fallos acotados:** la petición OAuth tiene destino fijo, timeout y redirecciones
-  bloqueadas. Los rechazos transitorios tienen cooldown; los terminales piden
-  reautenticación. Un resultado incierto no repite el refresh token anterior.
+- **Coordination:** a shared Promise and a file lock coordinate Claudeway
+  processes. The source is re-read before renewing and before writing.
+- **Persistence:** keeps scopes and other metadata, updates the same source and
+  returns the grant to V2's OAuth callback. Files are replaced atomically with
+  private permissions.
+- **Recovery:** `.claudeway-refresh.json` holds new tokens only while a write is
+  pending, with POSIX `0600` permissions. Afterwards only a receipt with hashes
+  remains, no tokens. **Do not share it or delete it blindly.**
+- **Bounded failures:** the OAuth request has a fixed destination, a timeout and
+  blocked redirects. Transient rejections get a cooldown; terminal ones ask you to
+  re-authenticate. An uncertain result never replays the old refresh token.
 
-Claude Code no está obligado a respetar nuestro bloqueo. Las relecturas reducen
-carreras, pero no garantizan exclusión absoluta frente a otros clientes ni
-recuperación tras un cierre antes de persistir la respuesta OAuth.
+Claude Code is not required to honor our lock. Re-reads reduce races but cannot
+guarantee absolute exclusion against other clients, nor recovery after a crash
+before the OAuth response is persisted.
 
-### Token propio (evita choques con Claude Code)
+### Dedicated token (avoids clashes with Claude Code)
 
-Claudeway y Claude Code comparten un refresh token rotatorio, así que pueden
-chocar al renovar (síntoma: *OAuth renewal is rate-limited*). Para evitarlo,
-guarda un token anual independiente (`claude setup-token`) en el ítem de Keychain
-`Claudeway-token` (macOS) o en `~/.claude/.claudeway-token` con permisos `0600`
-(Linux). Si existe, Claudeway lo usa tal cual: **no lee ni renueva** las
-credenciales de Claude Code. Un 401 pide repetir `setup-token`. Pasos en
+Claudeway and Claude Code share a rotating refresh token, so they can collide
+when renewing (symptom: *OAuth renewal is rate-limited*). To avoid it, store a
+separate year-long token (`claude setup-token`) in the `Claudeway-token` Keychain
+item (macOS) or in `~/.claude/.claudeway-token` with `0600` permissions (Linux).
+When present, Claudeway uses it as-is: it **never reads or renews** Claude Code's
+credentials. A 401 means you need to repeat `setup-token`. Steps in
 [installation.md](installation.md#optional-dedicated-token-no-renewal-conflicts-with-claude-code).
-No compatible con Windows.
+Not supported on Windows.
 
-## Seguridad y límites
+## Security and limits
 
-### Qué está comprobado
+### What has been verified
 
-| Recorrido | Evidencia actual |
+| Path | Current evidence |
 | :--- | :--- |
-| Generación real con suscripción | La versión anterior obtuvo **HTTP 200 y `OK`** con Haiku, sin API key. |
-| Implementación JS y renovación | Verificadas con fixtures y el host SDK V2; **sin renovación real** en esta etapa. |
-| macOS | Pruebas locales ejecutadas; Keychain simulado. |
-| Linux / Windows | Pendientes. En Windows la renovación está deshabilitada hasta verificar ACLs privadas. |
+| Real generation with a subscription | The previous version got **HTTP 200 and `OK`** with Haiku, no API key. |
+| JS implementation and renewal | Verified with fixtures and the V2 host SDK; **no real renewal** at this stage. |
+| macOS | Local tests run; Keychain mocked. |
+| Linux / Windows | Pending. On Windows renewal is disabled until private ACLs are verified. |
 
-### Límites que debes conocer
+### Limits you should know
 
-- **Redirecciones:** el host puede seguir el primer envío y reenviar el cuerpo.
-  Bloquear redirecciones en OAuth o en el verificador no corrige ese transporte.
-- **Prioridad de instrucciones:** la compatibilidad mueve instrucciones desde
-  `system` al primer mensaje de usuario, reduciendo su prioridad. No es equivalente
-  a mantenerlas en `system`; las comprobaciones de permisos de OpenCode no cambian.
-- **Keychain:** se rechazan actualizaciones que excedan la línea segura de
-  `security -i` —4094 bytes—, sin truncarlas.
-- **Fuente única:** respeta `CLAUDE_CONFIG_DIR`; no descubre otras cuentas. En macOS
-  solo usa el archivo si no existe el ítem Keychain correspondiente.
-- **Sin registros de secretos:** no registra tokens, prompts ni cuerpos de error.
-  Las escrituras Keychain viajan por stdin, nunca por argumentos ni entorno.
-- **Alcance limitado:** no incluye multicuenta, routing, proxy, telemetría ni
-  refresco en segundo plano. El fallback de 400/429 conocidos quita solo betas
-  presentes, con hasta dos reintentos; no recupera errores 401.
+- **Redirects:** the host may follow the first request and resend the body.
+  Blocking redirects in OAuth or in the verifier does not fix that transport.
+- **Instruction priority:** compatibility moves instructions from `system` to the
+  first user message, lowering their priority. That is not equivalent to keeping
+  them in `system`; OpenCode's permission checks are unchanged.
+- **Keychain:** updates longer than `security -i`'s safe line (4094 bytes) are
+  rejected, never truncated.
+- **Single source:** honors `CLAUDE_CONFIG_DIR`; does not discover other accounts.
+  On macOS the file is used only if the matching Keychain item does not exist.
+- **No secret logging:** never logs tokens, prompts or error bodies. Keychain
+  writes go through stdin, never arguments or environment.
+- **Limited scope:** no multi-account, routing, proxy, telemetry or background
+  refresh. The fallback for known 400/429 errors removes only betas that are
+  present, with up to two retries; it does not recover 401 errors.
 
-La renovación modifica la fuente seleccionada de Claude Code, no `auth.json`.
-El uso de credenciales de suscripción en clientes no oficiales puede estar
-restringido por las condiciones de Anthropic y dejar de funcionar.
+Renewal modifies the selected Claude Code source, not `auth.json`.
+Using subscription credentials in unofficial clients may be restricted by
+Anthropic's terms and may stop working.
 
-Consulta el [informe de compatibilidad](docs/compatibility.md) para los resultados,
-el historial de diagnóstico y las limitaciones completas.
+See the [compatibility report](docs/compatibility.md) (Spanish) for results,
+diagnostic history and the full list of limitations.
 
-## Desarrollo
+## Development
 
 **Node `24.12+` · pnpm `10.32.1` · OpenCode `2.0.29`**
 
@@ -192,61 +194,65 @@ pnpm run lint
 pnpm pack
 ```
 
-Si no tienes pnpm, sustituye `pnpm` por `npx --yes pnpm@10.32.1`.
-El paquete carga `src/index.js` directamente, sin `dist/` ni intérprete auxiliar.
-Las pruebas ordinarias no usan credenciales reales ni llaman a Anthropic: aíslan
-el entorno y utilizan fixtures, SQLite en memoria y transporte simulado.
+Without pnpm, replace `pnpm` with `npx --yes pnpm@10.32.1`.
+The package loads `src/index.js` directly, with no `dist/` or helper interpreter.
+Regular tests never use real credentials or call Anthropic: they isolate the
+environment and use fixtures, in-memory SQLite and a mocked transport.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 <details>
-<summary><strong>Mapa del proyecto</strong></summary>
+<summary><strong>Project map</strong></summary>
 
-| Archivo | Responsabilidad |
+| File | Responsibility |
 | :--- | :--- |
-| [`src/index.js`](src/index.js) | Integración V2 y destinos permitidos. |
-| [`src/storage.js`](src/storage.js) | Archivo/Keychain, validación, persistencia y bloqueo. |
-| [`src/credentials.js`](src/credentials.js) | Renovación OAuth, concurrencia y recuperación. |
-| [`src/transforms.js`](src/transforms.js) | Billing, identidad, instrucciones, Haiku y herramientas. |
-| [`src/compatibility.js`](src/compatibility.js) | Cabeceras, fallback y streaming. |
-| [`src/errors.js`](src/errors.js) | Códigos y mensajes sanitizados. |
-| [`test/`](test) | Pruebas de comportamiento y del host V2. |
-| [`scripts/diagnostics.mjs`](scripts/diagnostics.mjs) | Comparación sanitizada y diagnóstico del probe manual. |
+| [`src/index.js`](src/index.js) | V2 integration and allowed destinations. |
+| [`src/storage.js`](src/storage.js) | File/Keychain, validation, persistence and locking. |
+| [`src/credentials.js`](src/credentials.js) | OAuth renewal, concurrency and recovery. |
+| [`src/transforms.js`](src/transforms.js) | Billing, identity, instructions, Haiku and tools. |
+| [`src/compatibility.js`](src/compatibility.js) | Headers, fallback and streaming. |
+| [`src/errors.js`](src/errors.js) | Codes and sanitized messages. |
+| [`test/`](test) | Behavior and V2 host tests. |
+| [`scripts/diagnostics.mjs`](scripts/diagnostics.mjs) | Sanitized comparison and manual probe diagnostics. |
 
 </details>
 
 <details>
-<summary><strong>Prueba real optativa — requiere autorización</strong></summary>
+<summary><strong>Optional live check — requires authorization</strong></summary>
 
-Este verificador queda **fuera de las pruebas ordinarias**. Lee credenciales reales
-y puede consumir uso de la cuenta. No lo ejecutes sin autorizar expresamente ese uso.
+This verifier is **not part of the regular tests**. It reads real credentials and
+may consume account usage. Do not run it without explicitly authorizing that.
 
 ```sh
 node scripts/verify-live.mjs --confirm --max-requests=3
 ```
 
-- Permite una petición mínima y hasta dos reintentos, dentro del presupuesto total.
-  El valor predeterminado de `--max-requests` es `1`; cada envío tiene un máximo de
-  ocho tokens de salida y exige Bearer, ausencia de API key y destino oficial.
-- **No renueva tokens ni escribe sus fuentes.** Deshabilita la renovación automática
-  y rechaza credenciales a sesenta segundos o menos de caducar.
-- Bloquea redirecciones en su transporte aislado, no en el plugin de producción.
-- Espera que OAuth termine y distingue inicialización, credenciales y petición.
-  El informe omite tokens, prompts, IDs de sesión y errores crudos; sus diferencias
-  estructurales no demuestran qué adaptación resolvió por sí sola el error anterior.
+- Allows one minimal request and up to two retries within the total budget.
+  `--max-requests` defaults to `1`; each request is capped at eight output tokens
+  and requires Bearer auth, no API key and the official destination.
+- **Never renews tokens or writes their sources.** It disables automatic renewal
+  and rejects credentials sixty seconds or less from expiry.
+- Blocks redirects in its isolated transport, not in the production plugin.
+- Waits for OAuth to finish and distinguishes initialization, credentials and
+  request. The report omits tokens, prompts, session IDs and raw errors; its
+  structural diffs do not prove which adaptation alone fixed the earlier error.
 
 </details>
 
-## Retirada
+## Removal
 
-Retira la entrada de `plugins` y recarga OpenCode. Si conectaste una cuenta de
-prueba, elimina solo esa cuenta desde la interfaz nativa; **no borres las
-credenciales de Claude Code**. El plugin no mantiene temporizadores ni procesos
-persistentes.
+```sh
+opencode plugin remove @tamelabs/opencode-claudeway
+```
 
-## Créditos y licencia
+If you connected a test account, remove only that account from the native UI;
+**do not delete Claude Code's credentials**. The plugin keeps no timers or
+persistent processes.
 
-Proyecto independiente basado en una migración selectiva de
-[opencode-claude-auth](https://github.com/griffinmartin/opencode-claude-auth), no en
-una modificación de ese repositorio. Las referencias comunitarias no constituyen
-una autorización del servicio.
+## Credits and license
 
-[MIT](LICENSE) · [Atribuciones y dependencias](THIRD_PARTY_NOTICES.md)
+Independent project based on a selective migration of
+[opencode-claude-auth](https://github.com/griffinmartin/opencode-claude-auth), not
+a modification of that repository. Community references do not constitute
+authorization to use the service.
+
+[MIT](LICENSE) · [Attributions and dependencies](THIRD_PARTY_NOTICES.md)

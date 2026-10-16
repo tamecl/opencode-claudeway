@@ -1,16 +1,25 @@
 {
-  "name": "opencode-claudeway",
-  "version": "0.1.0-alpha.1",
-  "private": true,
+  "name": "@tamelabs/opencode-claudeway",
+  "version": "0.1.0",
   "description": "Unofficial Claude Code credential integration for OpenCode V2",
   "license": "MIT",
+  "keywords": ["opencode", "opencode-plugin", "claude-code", "anthropic", "oauth"],
+  "homepage": "https://github.com/tamecl/opencode-claudeway#readme",
+  "bugs": "https://github.com/tamecl/opencode-claudeway/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tamecl/opencode-claudeway.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "exports": {
     ".": {
       "import": "./src/index.js"
     }
   },
-  "files": ["src/*.js", "docs", "README.md", "installation.md", "LICENSE", "THIRD_PARTY_NOTICES.md"],
+  "files": ["src/*.js", "docs/compatibility.md", "README.md", "README.es.md", "installation.md", "LICENSE", "THIRD_PARTY_NOTICES.md"],
   "engines": { "node": ">=24.12.0" },
   "packageManager": "pnpm@10.32.1",
   "scripts": {

@@ -7,7 +7,7 @@ import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { test } from "node:test"
 import { Host } from "@opencode/plugin/host"
-import plugin, { credentialReader } from "opencode-claudeway"
+import plugin, { credentialReader } from "@tamelabs/opencode-claudeway"
 import { compareRequest, compatibilityProbe, waitForOAuth, installTransportBudget } from "../scripts/diagnostics.mjs"
 import { CredentialStore } from "../src/storage.js"
 import { readCredentials, TOKEN_URL } from "../src/credentials.js"
@@ -175,7 +175,7 @@ test("loads the JavaScript package through the V2 package loader and lists it as
   transport = async () => { throw new Error("Network disabled in Claudeway tests") }
   t.mock.method(globalThis, "fetch", (input, init) => transport(input, init))
   const root = fileURLToPath(new URL("../", import.meta.url))
-  const entry = Host.resolve({ directory: root, name: "opencode-claudeway" })
+  const entry = Host.resolve({ directory: root, name: "@tamelabs/opencode-claudeway" })
   assert.ok(entry.server.replaceAll("\\", "/").endsWith("/src/index.js"))
   const loaded = await Host.load(entry.server)
   const { OpenCode } = await import("@opencode/sdk")

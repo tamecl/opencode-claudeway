@@ -6,7 +6,7 @@ import { join } from "node:path"
 import { PassThrough } from "node:stream"
 import { test } from "node:test"
 import { CredentialStore, atomicJSON, hash, keychainCommand, parseCredentials, readBounded, security, withFileLock } from "../src/storage.js"
-import { credentialReader } from "opencode-claudeway"
+import { credentialReader } from "@tamelabs/opencode-claudeway"
 
 const credentials = { accessToken: "fixture-access", refreshToken: "fixture-refresh", expiresAt: 2_000_000_000_000 }
 const safeError = code => error => error.code === code && !JSON.stringify(error).includes("fixture-secret") && !error.message.includes("fixture-secret")
