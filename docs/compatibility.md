@@ -354,8 +354,8 @@ La recuperación automática de un error 401 de generación sigue fuera de alcan
 
 | Entorno | Automáticas | Cuenta real |
 | --- | --- | --- |
-| macOS | 84 pruebas JS, renovación simulada | Haiku histórico: HTTP 200 y `OK`; renovación real pendiente |
-| Linux | Pendientes | No probada |
+| macOS | 84 pruebas JS, renovación simulada | Haiku 5.5, Sonnet 5.5 y Opus 5.5 en OpenCode `2.0.29`: generación real OK; renovación real pendiente |
+| Linux (Ubuntu) | Pendientes | Haiku 5.5, Sonnet 5.5, Opus 5.5 y Fable 5.1 en OpenCode `2.0.29`: generación real OK; renovación real pendiente |
 | Windows | Pendientes; renovación deshabilitada hasta verificar ACLs | No probada |
 
 ## Fuentes

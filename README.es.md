@@ -6,12 +6,14 @@
 
 Integración no oficial con renovación OAuth bajo demanda. Sin API key.
 
+Claudeway es un plugin open source para OpenCode V2 que te permite usar tu suscripción Claude Pro o Max (mediante las credenciales de Claude Code) en lugar de una API key de Anthropic.
+
 [![CI](https://img.shields.io/github/actions/workflow/status/tamecl/opencode-claudeway/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/tamecl/opencode-claudeway/actions/workflows/ci.yml)
 [![OpenCode 2.0.29](https://img.shields.io/badge/OpenCode-2.0.29-24292f?style=flat-square)](https://opencode.ai/v2/docs/plugins)
 [![Estado experimental](https://img.shields.io/badge/estado-experimental-d29922?style=flat-square)](docs/compatibility.md)
 [![Licencia MIT](https://img.shields.io/badge/licencia-MIT-3fb950?style=flat-square)](LICENSE)
 
-[English](README.md) · [Instalación](#instalación) · [Renovación](#renovación-automática) · [Seguridad](#seguridad-y-límites) · [Desarrollo](#desarrollo) · [Guía para agentes](installation.md)
+[English](README.md) · [Instalación](#instalación) · [Renovación](#renovación-automática) · [Seguridad](#seguridad-y-límites) · [Preguntas frecuentes](#preguntas-frecuentes) · [Desarrollo](#desarrollo) · [Guía para agentes](installation.md)
 
 </div>
 
@@ -62,6 +64,10 @@ Después, dentro de OpenCode:
 1. **`/connect`** → Anthropic → **Claude Code credentials (Claudeway)**.
 2. Deja activa la cuenta Claudeway.
 3. **`/models`** → selecciona tu modelo Claude.
+
+<p align="center">
+  <img src="docs/assets/model-picker.png" width="640" alt="Selector de modelos de OpenCode V2 con Claude Fable 5.1, Haiku 5.5, Opus 5.5 y Sonnet 5.5 disponibles mediante Claudeway con una suscripción de Claude">
+</p>
 
 > [!IMPORTANT]
 > Conectar o usar Claudeway puede renovar tokens y actualizar la fuente de
@@ -154,10 +160,11 @@ No compatible con Windows.
 
 | Recorrido | Evidencia actual |
 | :--- | :--- |
-| Generación real con suscripción | La versión anterior obtuvo **HTTP 200 y `OK`** con Haiku, sin API key. |
+| Generación real con suscripción | **Funcionando** en OpenCode `2.0.29`, sin API key. |
 | Implementación JS y renovación | Verificadas con fixtures y el host SDK V2; **sin renovación real** en esta etapa. |
-| macOS | Pruebas locales ejecutadas; Keychain simulado. |
-| Linux / Windows | Pendientes. En Windows la renovación está deshabilitada hasta verificar ACLs privadas. |
+| macOS | Generación real con Haiku 5.5, Sonnet 5.5 y Opus 5.5. Pruebas locales ejecutadas; Keychain simulado. |
+| Linux (Ubuntu) | Generación real con Haiku 5.5, Sonnet 5.5, Opus 5.5 y Fable 5.1. Renovación real y pruebas automáticas pendientes. |
+| Windows | Pendiente. La renovación está deshabilitada hasta verificar ACLs privadas. |
 
 ### Límites que debes conocer
 
@@ -182,6 +189,41 @@ restringido por las condiciones de Anthropic y dejar de funcionar.
 
 Consulta el [informe de compatibilidad](docs/compatibility.md) para los resultados,
 el historial de diagnóstico y las limitaciones completas.
+
+## Preguntas frecuentes
+
+**¿Cómo uso mi suscripción Claude Pro o Max en OpenCode?**
+Instala Claudeway (`opencode plugin add @tamelabs/opencode-claudeway`), conecta
+**Claude Code credentials (Claudeway)** en `/connect` y elige un modelo en
+`/models`. Necesitas una sesión de Claude Code existente.
+
+**¿Necesito una API key de Anthropic?**
+No. Claudeway usa las credenciales OAuth de Claude Code, no una API key.
+
+**¿Qué modelos funcionan?**
+Probado con generación real en OpenCode `2.0.29`: Claude Haiku 5.5, Sonnet 5.5 y
+Opus 5.5 en macOS, y además Fable 5.1 en Ubuntu.
+
+**¿Qué sistemas operativos soporta?**
+macOS y Linux. En Windows la renovación está deshabilitada hasta verificar ACLs
+privadas.
+
+**¿Es gratis y open source?**
+Sí, licencia MIT. Necesitas tu propia suscripción de Claude.
+
+**¿Funciona con OpenCode V1?**
+No. Claudeway es solo para OpenCode V2.
+
+**¿En qué se diferencia de opencode-claude-auth?**
+Claudeway es un proyecto independiente para OpenCode V2, basado en una migración
+selectiva de [opencode-claude-auth](https://github.com/griffinmartin/opencode-claude-auth).
+Agrega renovación OAuth bajo demanda con bloqueo de archivo, recuperación ante
+escrituras interrumpidas y un [token dedicado](#token-propio-evita-choques-con-claude-code)
+opcional para no chocar con Claude Code.
+
+**¿Lo permite Anthropic?**
+Es no oficial. Usar credenciales de suscripción en clientes no oficiales puede
+estar restringido por las condiciones de Anthropic y podría dejar de funcionar.
 
 ## Desarrollo
 

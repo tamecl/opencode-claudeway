@@ -6,13 +6,15 @@
 
 Unofficial integration with on-demand OAuth renewal. No API key.
 
+Claudeway is an open-source OpenCode V2 plugin that lets you use your Claude Pro or Max subscription (via Claude Code credentials) instead of an Anthropic API key.
+
 [![CI](https://img.shields.io/github/actions/workflow/status/tamecl/opencode-claudeway/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/tamecl/opencode-claudeway/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@tamelabs/opencode-claudeway?style=flat-square)](https://www.npmjs.com/package/@tamelabs/opencode-claudeway)
 [![OpenCode 2.0.29](https://img.shields.io/badge/OpenCode-2.0.29-24292f?style=flat-square)](https://opencode.ai/v2/docs/plugins)
 [![Status: experimental](https://img.shields.io/badge/status-experimental-d29922?style=flat-square)](docs/compatibility.md)
 [![MIT License](https://img.shields.io/badge/license-MIT-3fb950?style=flat-square)](LICENSE)
 
-[Español](README.es.md) · [Install](#install) · [Renewal](#automatic-renewal) · [Security](#security-and-limits) · [Development](#development) · [Agent guide](installation.md)
+[Español](README.es.md) · [Install](#install) · [Renewal](#automatic-renewal) · [Security](#security-and-limits) · [FAQ](#faq) · [Development](#development) · [Agent guide](installation.md)
 
 </div>
 
@@ -62,6 +64,10 @@ Then, inside OpenCode:
 1. **`/connect`** → Anthropic → **Claude Code credentials (Claudeway)**.
 2. Keep the Claudeway account active.
 3. **`/models`** → pick your Claude model.
+
+<p align="center">
+  <img src="docs/assets/model-picker.png" width="640" alt="OpenCode V2 model picker showing Claude Fable 5.1, Haiku 5.5, Opus 5.5 and Sonnet 5.5 available through Claudeway with a Claude subscription">
+</p>
 
 > [!IMPORTANT]
 > Connecting or using Claudeway may renew tokens and update Claude Code's
@@ -153,10 +159,11 @@ Not supported on Windows.
 
 | Path | Current evidence |
 | :--- | :--- |
-| Real generation with a subscription | The previous version got **HTTP 200 and `OK`** with Haiku, no API key. |
+| Real generation with a subscription | **Working** on OpenCode `2.0.29`, no API key. |
 | JS implementation and renewal | Verified with fixtures and the V2 host SDK; **no real renewal** at this stage. |
-| macOS | Local tests run; Keychain mocked. |
-| Linux / Windows | Pending. On Windows renewal is disabled until private ACLs are verified. |
+| macOS | Real generation with Haiku 5.5, Sonnet 5.5 and Opus 5.5. Local tests run; Keychain mocked. |
+| Linux (Ubuntu) | Real generation with Haiku 5.5, Sonnet 5.5, Opus 5.5 and Fable 5.1. Real renewal and automated tests pending. |
+| Windows | Pending. Renewal is disabled until private ACLs are verified. |
 
 ### Limits you should know
 
@@ -181,6 +188,40 @@ Anthropic's terms and may stop working.
 
 See the [compatibility report](docs/compatibility.md) (Spanish) for results,
 diagnostic history and the full list of limitations.
+
+## FAQ
+
+**How do I use my Claude Pro or Max subscription in OpenCode?**
+Install Claudeway (`opencode plugin add @tamelabs/opencode-claudeway`), connect
+**Claude Code credentials (Claudeway)** in `/connect` and pick a model in
+`/models`. You need an existing Claude Code session.
+
+**Do I need an Anthropic API key?**
+No. Claudeway uses Claude Code's OAuth credentials, not an API key.
+
+**Which models work?**
+Tested with real generation on OpenCode `2.0.29`: Claude Haiku 5.5, Sonnet 5.5
+and Opus 5.5 on macOS, plus Fable 5.1 on Ubuntu.
+
+**Which operating systems are supported?**
+macOS and Linux. On Windows renewal is disabled until private ACLs are verified.
+
+**Is it free and open source?**
+Yes, MIT licensed. You need your own Claude subscription.
+
+**Does it work with OpenCode V1?**
+No. Claudeway targets OpenCode V2 only.
+
+**How is it different from opencode-claude-auth?**
+Claudeway is an independent project for OpenCode V2, based on a selective
+migration of [opencode-claude-auth](https://github.com/griffinmartin/opencode-claude-auth).
+It adds on-demand OAuth renewal with file locking, recovery from interrupted
+writes and an optional [dedicated token](#dedicated-token-avoids-clashes-with-claude-code)
+to avoid clashing with Claude Code.
+
+**Is it allowed by Anthropic?**
+It is unofficial. Using subscription credentials in unofficial clients may be
+restricted by Anthropic's terms and could stop working at any time.
 
 ## Development
 
