@@ -29,7 +29,6 @@ Unofficial integration with on-demand OAuth renewal. No API key.
 | **Your existing subscription** | Uses Claude Code OAuth, not an API-key connection. |
 | **On-demand renewal** | Renews when you use the model: no timers, no helper CLI generations. |
 | **Native integration** | Explicitly enabled in OpenCode V2; your other connections stay untouched. |
-| **JavaScript end to end** | No Python, no build step, no new native dependencies. |
 
 ## Install
 

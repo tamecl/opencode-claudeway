@@ -8,7 +8,6 @@ Integración no oficial con renovación OAuth bajo demanda. Sin API key.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/tamecl/opencode-claudeway/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/tamecl/opencode-claudeway/actions/workflows/ci.yml)
 [![OpenCode 2.0.29](https://img.shields.io/badge/OpenCode-2.0.29-24292f?style=flat-square)](https://opencode.ai/v2/docs/plugins)
-[![JavaScript ESM](https://img.shields.io/badge/JavaScript-ESM-f7df1e?style=flat-square)](package.json)
 [![Estado experimental](https://img.shields.io/badge/estado-experimental-d29922?style=flat-square)](docs/compatibility.md)
 [![Licencia MIT](https://img.shields.io/badge/licencia-MIT-3fb950?style=flat-square)](LICENSE)
 
@@ -29,7 +28,6 @@ Integración no oficial con renovación OAuth bajo demanda. Sin API key.
 | **Tu suscripción existente** | Utiliza OAuth de Claude Code, no una conexión con API key. |
 | **Renovación bajo demanda** | Renueva al usar el modelo, sin temporizadores ni generaciones auxiliares del CLI. |
 | **Integración nativa** | Se activa explícitamente en OpenCode V2 y conserva las demás conexiones. |
-| **JavaScript de principio a fin** | Sin Python, compilación ni dependencias nativas nuevas. |
 
 ## Instalación
 
