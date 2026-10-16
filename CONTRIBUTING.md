@@ -37,4 +37,5 @@ git tag v0.1.1
 git push origin v0.1.1
 ```
 
-The `Release` workflow tests and publishes to npm with provenance through trusted publishing.
+The `Release` workflow tests and stages the version on npm through trusted publishing. A maintainer then approves it
+with 2FA on npmjs.com (package → Staged) before it becomes public, with provenance.

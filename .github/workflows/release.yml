@@ -26,5 +26,5 @@ jobs:
       - run: pnpm test
       - name: Tag matches package version
         run: test "v$(node -p 'require("./package.json").version')" = "$GITHUB_REF_NAME"
-      # Trusted publishing adds provenance automatically
-      - run: npm publish --access public
+      # Staged: a maintainer approves with 2FA on npmjs.com; provenance is automatic
+      - run: npm stage publish --access public
