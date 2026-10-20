@@ -60,15 +60,15 @@ test("read-only diagnostics retain the exact sixty-second boundary and never ren
   assert.deepEqual(await fs.readdir(directory), [".credentials.json"])
 })
 
-test("renews on demand with one fixed-destination request and persists rotation without losing metadata", async t => {
+test("renews on demand with Claude Code's JSON token endpoint and persists rotation without losing metadata", async t => {
   const { store, current, path, directory } = await fixture(t, -1)
   const renewed = next()
   const send = t.mock.method(globalThis, "fetch", async (url, init) => {
-    assert.equal(url, TOKEN_URL)
+    assert.equal(url, "https://platform.claude.com/v1/oauth/token")
     assert.equal(init.method, "POST")
     assert.equal(init.redirect, "error")
-    assert.equal(init.headers["content-type"], "application/x-www-form-urlencoded")
-    assert.deepEqual(Object.fromEntries(init.body), { grant_type: "refresh_token", client_id: "9d1c250a-e61b-44d9-88ed-5944d1962f5e", refresh_token: current.refreshToken })
+    assert.equal(init.headers["content-type"], "application/json")
+    assert.deepEqual(JSON.parse(init.body), { grant_type: "refresh_token", client_id: "9d1c250a-e61b-44d9-88ed-5944d1962f5e", refresh_token: current.refreshToken })
     assert.equal((await store.readState()).phase, "inflight")
     return response(oauth(renewed))
   })

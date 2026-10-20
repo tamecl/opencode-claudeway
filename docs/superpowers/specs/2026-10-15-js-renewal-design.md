@@ -46,11 +46,11 @@ que no hace falta para mantener un único lenguaje en este paquete pequeño.
    Claude Code o cambio de cuenta. Una llamada posterior empieza con una lectura
    nueva de la fuente seleccionada. No se introduce descubrimiento multicuenta.
 4. Preparar un registro privado y durable de operación en curso antes de la red.
-   Hacer un único POST a `https://claude.ai/v1/oauth/token` con contenido
-   `application/x-www-form-urlencoded`: `grant_type=refresh_token`,
+   Hacer un único POST a `https://platform.claude.com/v1/oauth/token` con contenido
+   `application/json`: `grant_type=refresh_token`,
    `client_id=9d1c250a-e61b-44d9-88ed-5944d1962f5e` y el refresh token leído.
-   Referencia exacta: `opencode-claude-auth` 2.2.1, commit
-   `8aad811a4da3813ab3985063e656fed582909780`, `src/credentials.ts`.
+   Corrección aprobada el 2026-10-20: endpoint y formato comprobados en Claude Code
+   `2.1.300`, sustituyendo la referencia anterior a `opencode-claude-auth` 2.2.1.
    Timeout de quince segundos y `redirect: "error"`. No reintentar automáticamente
    una operación de resultado desconocido. La respuesta debe traer `access_token`
    válido y caducidad verificable: `expires_at` futuro en milisegundos o
@@ -127,9 +127,17 @@ token nuevo. Mantener las regresiones de transformación, streaming y presupuest
 
 El probe manual debe conservar por defecto su promesa de solo lectura: llamar al
 lector con renovación deshabilitada y bloquear destinos de renovación mediante su
-guard de transporte. No ejecutarlo ahora. Comprobar `node --test`, lint,
+guard de transporte. Comprobar `node --test`, lint,
 `git diff --check` y el contenido del paquete sin Python ni herramientas de build.
 
+Para la corrección del 2026-10-20, el usuario autorizó probar su sesión vencida:
+hacer una renovación real con el lector corregido y, si funciona, una generación
+mínima con el probe existente. Mostrar solo estado HTTP, códigos sanitizados y
+caducidad, nunca tokens ni cuerpos de error. No repetir intercambios inciertos,
+reiniciar el servicio ni publicar cambios sin autorización. La regresión fija
+literalmente el destino oficial y valida JSON tanto en el lector como en el host
+V2. No se añaden scopes, reintentos ni dependencias; un 429 real puede persistir.
+
 La limitación de redirecciones del primer envío nativo y la prioridad reducida de
-instrucciones siguen fuera de este cambio. Esta tarea no certifica compatibilidad
-real de renovación ni conversaciones largas.
+instrucciones siguen fuera de este cambio. Una renovación real correcta no
+certifica exclusión frente a otros clientes ni conversaciones largas.

@@ -1,8 +1,8 @@
 # Compatibilidad — hito 1
 
 Estado: código y pruebas en **JavaScript único**, ya probado por el autor en la
-versión actual. La renovación OAuth bajo demanda está en revisión (hasta ahora solo
-verificada mediante fixtures). La generación real de la versión híbrida obtuvo
+versión actual. La renovación OAuth bajo demanda sigue en revisión, con una
+renovación real verificada en macOS el 2026-10-20. La versión actual y la híbrida obtuvieron
 **HTTP 200 y `OK`**, sin API key. Sigue siendo experimental: faltan sesiones largas,
 herramientas reales y resolver las redirecciones del host, que no tienen solución aún.
 Los 401/400 de abajo son resultados históricos anteriores a la adaptación.
@@ -40,8 +40,8 @@ Claudeway; se relee la fuente al adquirirlo. Los recibos sin tokens permiten
 reconocer renovaciones propias. Sin esa prueba no se confunde un token diferente
 con una renovación legítima: se aborta conservadoramente como fuente cambiada.
 
-La renovación hace un único POST a `https://claude.ai/v1/oauth/token`, con el
-client ID público y formato form de la referencia, timeout de quince segundos y
+La renovación hace un único POST a `https://platform.claude.com/v1/oauth/token`, con el
+client ID público y formato JSON de Claude Code `2.1.300`, timeout de quince segundos y
 redirecciones bloqueadas. Valida tokens y caducidad sin inventar una por defecto.
 Los rechazos transitorios explícitos tienen cooldown; los terminales no se repiten
 con el mismo refresh token mientras viva el proceso. No lanza generaciones del CLI.
@@ -66,9 +66,20 @@ comportamiento. `src/compatibility.js` mantiene cabeceras, fallback y streaming.
 El lector público conserva un modo `{ renew: false }`: no consulta el registro,
 no escribe y rechaza credenciales a sesenta segundos o menos de caducar.
 
-La validación local actual usa Node `25.6.1` en macOS: 84 pruebas JS, lint limpio
-y empaquetado verificado. Las otras plataformas siguen
+La validación local actual en macOS pasa 91 pruebas JS y lint limpio.
+Las otras plataformas siguen
 pendientes. Las pruebas ordinarias nunca acceden al Keychain ni al servicio reales.
+
+### Renovación real autorizada — 2026-10-20
+
+Una sesión vencida guardada en Keychain se renovó con un único POST: **HTTP 200**,
+rotación de access y refresh token, escritura verificada y recibo sin tokens.
+La nueva validez fue de ocho horas. Una generación mínima posterior con el host
+SDK `2.0.29` obtuvo **HTTP 200 y `OK`**, en un único envío y sin API key.
+El probe estándar devolvió `expired` dentro de su aislamiento; para esta generación
+se leyó previamente el Keychain real y se mantuvieron las credenciales solo en memoria.
+El servicio de escritorio `2.1.1` confirmó el plugin local corregido como `active`,
+sin reiniciarlo. No se verificó otra renovación tras esperar ocho horas.
 
 ## Mecanismo público elegido
 

@@ -160,8 +160,8 @@ Not supported on Windows.
 | Path | Current evidence |
 | :--- | :--- |
 | Real generation with a subscription | **Working** on OpenCode `2.0.29`, no API key. |
-| JS implementation and renewal | Verified with fixtures and the V2 host SDK; **no real renewal** at this stage. |
-| macOS | Real generation with Haiku 5.5, Sonnet 5.5 and Opus 5.5. Local tests run; Keychain mocked. |
+| JS implementation and renewal | Fixtures and V2 host SDK; one expired-session renewal and subsequent generation returned **HTTP 200** on macOS (2026-10-20). |
+| macOS | Real generation with Haiku 5.5, Sonnet 5.5 and Opus 5.5. Real Keychain renewal verified; 91 automated tests pass. |
 | Linux (Ubuntu) | Real generation with Haiku 5.5, Sonnet 5.5, Opus 5.5 and Fable 5.1. Real renewal and automated tests pending. |
 | Windows | Pending. Renewal is disabled until private ACLs are verified. |
 

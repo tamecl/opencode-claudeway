@@ -256,9 +256,11 @@ test("the V2 host stores a renewed OAuth grant and generates using the rotated f
   transport = async (input, init) => {
     const request = new Request(input, init)
     if (request.url === TOKEN_URL) {
+      assert.equal(request.url, "https://platform.claude.com/v1/oauth/token")
       assert.equal(request.redirect, "error")
-      const body = new URLSearchParams(await request.text())
-      assert.equal(body.get("refresh_token"), initial.refreshToken)
+      assert.equal(request.headers.get("content-type"), "application/json")
+      const body = await request.json()
+      assert.deepEqual(body, { grant_type: "refresh_token", client_id: "9d1c250a-e61b-44d9-88ed-5944d1962f5e", refresh_token: initial.refreshToken })
       assert.equal(++exchanges, 1)
       return new Response(JSON.stringify({ access_token: renewed.accessToken, refresh_token: renewed.refreshToken, expires_at: renewed.expiresAt }), { headers: { "content-type": "application/json" } })
     }

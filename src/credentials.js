@@ -2,7 +2,7 @@ import * as fs from "node:fs/promises"
 import { failure } from "./errors.js"
 import { CredentialStore, fingerprint, hash, parseCredentials, record, withFileLock } from "./storage.js"
 
-export const TOKEN_URL = "https://claude.ai/v1/oauth/token"
+export const TOKEN_URL = "https://platform.claude.com/v1/oauth/token"
 const CLIENT_ID = "9d1c250a-e61b-44d9-88ed-5944d1962f5e"
 const flights = new Map()
 // shortcut: failure cooldown is process-local; persist it if multiple hosts hit refresh rate limits together.
@@ -82,8 +82,8 @@ async function refreshLocked(store, initial) {
   try {
     response = await fetch(TOKEN_URL, {
       method: "POST", redirect: "error", signal: AbortSignal.timeout(15_000),
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ grant_type: "refresh_token", client_id: CLIENT_ID, refresh_token: current.credentials.refreshToken }),
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ grant_type: "refresh_token", client_id: CLIENT_ID, refresh_token: current.credentials.refreshToken }),
     })
   } catch { throw failure("refresh-uncertain") }
   const data = await responseJSON(response)

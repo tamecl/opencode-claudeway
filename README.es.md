@@ -161,8 +161,8 @@ No compatible con Windows.
 | Recorrido | Evidencia actual |
 | :--- | :--- |
 | Generación real con suscripción | **Funcionando** en OpenCode `2.0.29`, sin API key. |
-| Implementación JS y renovación | Verificadas con fixtures y el host SDK V2; **sin renovación real** en esta etapa. |
-| macOS | Generación real con Haiku 5.5, Sonnet 5.5 y Opus 5.5. Pruebas locales ejecutadas; Keychain simulado. |
+| Implementación JS y renovación | Fixtures y host SDK V2; una renovación de sesión vencida y una generación posterior dieron **HTTP 200** en macOS (2026-10-20). |
+| macOS | Generación real con Haiku 5.5, Sonnet 5.5 y Opus 5.5. Renovación real en Keychain verificada; 91 pruebas automáticas pasan. |
 | Linux (Ubuntu) | Generación real con Haiku 5.5, Sonnet 5.5, Opus 5.5 y Fable 5.1. Renovación real y pruebas automáticas pendientes. |
 | Windows | Pendiente. La renovación está deshabilitada hasta verificar ACLs privadas. |
 
