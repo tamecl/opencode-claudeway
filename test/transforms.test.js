@@ -9,7 +9,7 @@ test("moves system instructions without mutating input or duplicating cache cont
   const original = structuredClone(payload)
   const adapted = adaptRequest(payload)
   assert.deepEqual(payload, original)
-  assert.deepEqual(adapted.body.system, [{ type: "text", text: "x-anthropic-billing-header: cc_version=2.1.280.d7b; cc_entrypoint=sdk-cli; cch=fa690;" }, { type: "text", text: IDENTITY }])
+  assert.deepEqual(adapted.body.system, [{ type: "text", text: "x-anthropic-billing-header: cc_version=2.1.329.3c4; cc_entrypoint=sdk-cli; cch=fa690;" }, { type: "text", text: IDENTITY }])
   assert.equal(adapted.body.messages[0].content, "instructions\n\nmore instructions\n\nhey")
 })
 
@@ -51,7 +51,7 @@ test("rejects malformed native system updates", () => {
 
 test("billing preserves the previous UTF-16 and UTF-8 compatibility vectors", () => {
   for (const [text, cch, suffix] of [["hey", "fa690", "d7b"], ["hello", "2cf24", "790"], ["😀😀a😀0123456789😀XYZ", "f2fc1", "17d"], ["a\ud800b", "05087", "d7b"]]) {
-    const value = billingHeader([{ role: "user", content: text }])
+    const value = billingHeader([{ role: "user", content: text }], "2.1.280")
     assert.ok(value.includes(`cc_version=2.1.280.${suffix};`))
     assert.ok(value.includes(`cch=${cch};`))
   }

@@ -145,6 +145,10 @@ valida el destino antes de leer credenciales y adapta el JSON con `src/transform
   beta de esfuerzo, sin quitar otros campos.
 - Añade cabeceras de cliente y UUIDs; conserva cabeceras nativas ajenas y elimina
   `x-api-key` y cabeceras de longitud/codificación invalidadas al reescribir el cuerpo.
+- Detecta la versión del CLI con `claude --version` al inicializar el plugin y la
+  usa en `User-Agent` y en el marcador billing. Si el comando no está disponible
+  en el `PATH` de OpenCode o la detección falla, avisa y usa `2.1.329`. Reinicia
+  OpenCode después de actualizar el CLI. Esto no adapta cambios de protocolo.
 - Calcula el marcador billing de la referencia sobre el texto original del primer
   usuario, antes de trasladar instrucciones; lo coloca en `system[0]` y separa la
   identidad de Claude Code en otro bloque, sin duplicar `cache_control`.

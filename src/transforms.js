@@ -1,18 +1,18 @@
+import { FALLBACK_VERSION } from "./claude-version.js"
 import { failure } from "./errors.js"
 import { hash, record } from "./storage.js"
 
-export const VERSION = "2.1.280"
 export const IDENTITY = "You are Claude Code, Anthropic's official CLI for Claude."
 const BILLING = "x-anthropic-billing-header:"
 const BASE_BETAS = ["claude-code-20250219", "oauth-2025-04-20", "interleaved-thinking-2025-05-14", "prompt-caching-scope-2026-01-05", "context-management-2025-06-27", "advisor-tool-2026-03-01", "thinking-token-count-2026-05-13", "extended-cache-ttl-2025-04-11"]
 const LIMIT = 16_777_216
 
-export function billingHeader(messages) {
+export function billingHeader(messages, version = FALLBACK_VERSION) {
   const user = messages.find(message => message.role === "user")
   const text = typeof user?.content === "string" ? user.content : user?.content.find(block => block.type === "text")?.text ?? ""
   if (typeof text !== "string") throw failure("invalid-request")
   const sampled = [4, 7, 20].map(index => index < text.length ? text[index] : "0").join("")
-  return `${BILLING} cc_version=${VERSION}.${hash("59cf53e54c78" + sampled + VERSION).slice(0, 3)}; cc_entrypoint=sdk-cli; cch=${hash(text).slice(0, 5)};`
+  return `${BILLING} cc_version=${version}.${hash("59cf53e54c78" + sampled + version).slice(0, 3)}; cc_entrypoint=sdk-cli; cch=${hash(text).slice(0, 5)};`
 }
 
 export function toolAlias(name) {
@@ -62,7 +62,7 @@ function repairTools(messages) {
   return output
 }
 
-export function adaptRequest(payload) {
+export function adaptRequest(payload, version = FALLBACK_VERSION) {
   if (!record(payload) || typeof payload.model !== "string" || !payload.model) throw failure("invalid-request")
   const body = structuredClone(payload)
   const { messages } = body
@@ -75,7 +75,7 @@ export function adaptRequest(payload) {
   }
   const first = messages.find(message => message.role === "user")
   if (!first) throw failure("invalid-request")
-  const billing = billingHeader(messages)
+  const billing = billingHeader(messages, version)
   const system = typeof body.system === "string" ? [{ type: "text", text: body.system }] : body.system ?? []
   if (!Array.isArray(system) || system.some(entry => !record(entry) || entry.type !== "text" || typeof entry.text !== "string")) throw failure("invalid-request")
   const moved = system.flatMap(entry => {
@@ -120,14 +120,14 @@ export function adaptRequest(payload) {
     body.tool_choice.name = aliases.get(body.tool_choice.name)
   }
   body.messages = repairTools(messages)
-  return { body, betas, version: VERSION, toolNames: Object.fromEntries(names) }
+  return { body, betas, version, toolNames: Object.fromEntries(names) }
 }
 
-export function transformBody(raw) {
+export function transformBody(raw, version) {
   if (typeof raw !== "string") throw failure("invalid-request")
   if (Buffer.byteLength(raw) > LIMIT) throw failure("request-limit")
   let result
-  try { result = adaptRequest(JSON.parse(raw)) } catch { throw failure("invalid-request") }
+  try { result = adaptRequest(JSON.parse(raw), version) } catch { throw failure("invalid-request") }
   if (Buffer.byteLength(JSON.stringify(result)) > LIMIT) throw failure("request-limit")
   return result
 }

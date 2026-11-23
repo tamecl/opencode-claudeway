@@ -1,4 +1,5 @@
 import assert from "node:assert/strict"
+import childProcess from "node:child_process"
 import { mkdtemp, rm, writeFile } from "node:fs/promises"
 import { createServer } from "node:http"
 import { Socket } from "node:net"
@@ -13,6 +14,12 @@ import { CredentialStore } from "../src/storage.js"
 import { readCredentials, TOKEN_URL } from "../src/credentials.js"
 
 const nativeFetch = globalThis.fetch
+test.beforeEach(t => {
+  t.mock.method(childProcess, "execFile", (command, ...args) => {
+    assert.equal(command, "claude")
+    args.at(-1)(null, "2.1.340 (Claude Code)\n")
+  })
+})
 let transport = async () => { throw new Error("Network disabled in Claudeway tests") }
 function responseFixture(toolName) {
   const events = [

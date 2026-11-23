@@ -1,8 +1,24 @@
 import assert from "node:assert/strict"
+import childProcess from "node:child_process"
 import { mock, test } from "node:test"
 import plugin, { credentialReader } from "@tamelabs/opencode-claudeway"
+import { detectClaudeVersion, FALLBACK_VERSION } from "../src/claude-version.js"
 
 const body = JSON.stringify({ model: "claude-haiku-4-5", messages: [{ role: "user", content: "fixture prompt" }] })
+
+test.beforeEach(t => {
+  t.mock.method(childProcess, "execFile", (_command, _args, _options, done) => done(null, "2.1.340 (Claude Code)\n"))
+})
+
+test("warns and falls back for a missing Claude Code CLI or invalid version output", async t => {
+  const warn = t.mock.method(console, "warn", () => {})
+  childProcess.execFile.mock.mockImplementation((_command, _args, _options, done) => done(new Error("fixture error")))
+  assert.equal(await detectClaudeVersion(), FALLBACK_VERSION)
+  childProcess.execFile.mock.mockImplementation((_command, _args, _options, done) => done(null, "unexpected output"))
+  assert.equal(await detectClaudeVersion(), FALLBACK_VERSION)
+  assert.equal(warn.mock.callCount(), 2)
+  assert.match(warn.mock.calls[0].arguments[0], /PATH available to OpenCode/u)
+})
 
 function context(credential = { type: "oauth", methodID: "claudeway" }) {
   const hooks = new Map()
@@ -43,7 +59,11 @@ test("attaches credentials only to the official destination and requests redirec
     assert.equal(event.request.headers.get("authorization"), "Bearer fixture-access")
     assert.equal(event.request.headers.has("x-api-key"), false)
     assert.equal(event.request.redirect, "error")
+    assert.equal(event.request.headers.get("user-agent"), "claude-cli/2.1.340 (external, sdk-cli)")
+    assert.match((await event.request.json()).system[0].text, /cc_version=2\.1\.340\.[\da-f]{3};/u)
   }
+  assert.equal(childProcess.execFile.mock.callCount(), 1)
+  assert.deepEqual(childProcess.execFile.mock.calls[0].arguments.slice(0, 2), ["claude", ["--version"]])
 })
 
 test("the HTTP hook preserves native system updates through consecutive Claude 5.5 turns", async t => {

@@ -1,5 +1,6 @@
 import { Integration, Plugin } from "@opencode/plugin"
 import { randomUUID } from "node:crypto"
+import { detectClaudeVersion } from "./claude-version.js"
 import { requestHeaders, compatibleResponse } from "./compatibility.js"
 import { credentialReader } from "./credentials.js"
 import { failure } from "./errors.js"
@@ -8,14 +9,15 @@ import { transformBody } from "./transforms.js"
 export { credentialReader }
 
 export const requestAdapter = {
-  async transform(body) {
-    return transformBody(body)
+  async transform(body, version) {
+    return transformBody(body, version)
   },
 }
 
 export default Plugin.define({
   id: "opencode-claudeway",
   async setup(ctx) {
+    const version = await detectClaudeVersion()
     const sessionID = randomUUID()
     const owned = new WeakMap()
     const excludedByModel = new Map()
@@ -52,7 +54,7 @@ export default Plugin.define({
         !["/v1/messages", "/v1/messages/count_tokens"].includes(url.pathname)
       ) throw new Error("Claudeway refused an unauthorized credential destination.")
 
-      const adapted = await requestAdapter.transform(await event.request.clone().text())
+      const adapted = await requestAdapter.transform(await event.request.clone().text(), version)
       const credentials = await credentialReader.read()
       const excluded = excludedByModel.get(event.model.id) ?? new Set()
       excludedByModel.set(event.model.id, excluded)
