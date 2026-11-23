@@ -1,3 +1,8 @@
+> [!IMPORTANT]
+> **Este repositorio está archivado.** El desarrollo continúa en
+> [crxsx0/opencode-claudeway](https://github.com/crxsx0/opencode-claudeway).
+> Abre allí los nuevos issues y pull requests.
+
 <div align="center">
 
 # Claudeway
